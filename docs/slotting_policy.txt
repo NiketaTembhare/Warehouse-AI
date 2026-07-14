@@ -1,0 +1,11 @@
+SLOTTING POLICY - WAREHOUSE STORAGE GUIDELINES
+
+1. High velocity SKUs (Class A) must always be stored in Zone A near packing station.
+2. Medium velocity SKUs (Class B) are stored in Zone B.
+3. Low velocity SKUs (Class C) are stored in Zone C furthest from packing.
+4. Fragile items must be stored on lower shelves below 1.5 meters height.
+5. Heavy items above 15kg must be stored at ground level only.
+6. No re-slotting is permitted without manager digital approval in the system.
+7. All bin moves must be logged in the slotting history with reason and timestamp.
+8. Re-slotting should be scheduled during Night shift to avoid disruption.
+9. Cold storage items must never be moved to ambient temperature zones.

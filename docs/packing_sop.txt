@@ -1,0 +1,10 @@
+PACKING SOP - WAREHOUSE STANDARD OPERATING PROCEDURE
+
+1. Verify pick list against physical items before packing begins.
+2. Fragile items must be wrapped in bubble wrap before placing in box.
+3. Heavy items (above 10kg) must always be packed at the bottom of the box.
+4. Maximum box weight limit is 25kg. Split into two boxes if exceeded.
+5. Include packing slip inside every box before sealing.
+6. Apply shipping label clearly on the largest flat surface of the box.
+7. Priority orders must be packed and dispatched within 1 hour of picking.
+8. All packed orders must be scanned as Packed in WMS before moving to dispatch.

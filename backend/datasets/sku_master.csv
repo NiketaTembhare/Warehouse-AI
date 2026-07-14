@@ -1,0 +1,201 @@
+sku_id,sku_name,category,sub_category,weight_kg,length_cm,width_cm,height_cm,storage_type,preferred_zone
+SKU01001,Phone X1,Electronics,Mobile,0.2,15.0,7.0,0.8,Fragile,Fast
+SKU01002,Phone Pro,Electronics,Mobile,0.22,16.0,8.0,0.9,Fragile,Medium
+SKU01003,Phone Lite,Electronics,Mobile,0.18,14.0,7.0,0.7,Fragile,Fast
+SKU01004,Tablet 10,Electronics,Mobile,0.48,25.0,17.0,0.6,Fragile,Medium
+SKU01005,Smart Watch S,Electronics,Mobile,0.05,5.0,4.0,1.2,Normal,Fast
+SKU01006,Ultrabook 13,Electronics,Laptop,1.3,30.0,21.0,1.5,Fragile,Medium
+SKU01007,Gaming Laptop 15,Electronics,Laptop,2.4,36.0,26.0,2.5,Fragile,Slow
+SKU01008,Chromebook 11,Electronics,Laptop,1.1,28.0,20.0,1.8,Fragile,Medium
+SKU01009,Workstation Pro,Electronics,Laptop,2.8,38.0,27.0,3.0,Fragile,Slow
+SKU01010,Wireless Mouse,Electronics,Accessories,0.1,11.0,6.0,4.0,Normal,Fast
+SKU01011,Mechanical Keyboard,Electronics,Accessories,0.8,44.0,14.0,4.0,Normal,Medium
+SKU01012,USB-C Hub,Electronics,Accessories,0.08,10.0,3.0,1.0,Normal,Fast
+SKU01013,Webcam HD,Electronics,Accessories,0.15,8.0,5.0,5.0,Fragile,Medium
+SKU01014,Bluetooth Earbuds,Electronics,Accessories,0.04,6.0,4.0,3.0,Normal,Fast
+SKU01015,Gaming Headset,Electronics,Accessories,0.35,20.0,18.0,9.0,Normal,Medium
+SKU01016,Laptop Stand,Electronics,Accessories,0.6,27.0,23.0,4.0,Normal,Medium
+SKU01017,HDMI Cable 2m,Electronics,Cables,0.12,15.0,15.0,2.0,Normal,Fast
+SKU01018,USB-C Cable 1m,Electronics,Cables,0.05,10.0,10.0,1.0,Normal,Fast
+SKU01019,Lightning Cable 1m,Electronics,Cables,0.04,10.0,10.0,1.0,Normal,Fast
+SKU01020,Ethernet Cable 5m,Electronics,Cables,0.2,18.0,18.0,3.0,Normal,Medium
+SKU01021,Audio AUX Cable,Electronics,Cables,0.03,8.0,8.0,1.0,Normal,Slow
+SKU01022,Wall Charger 20W,Electronics,Chargers,0.06,5.0,4.0,3.0,Normal,Fast
+SKU01023,Fast Charger 65W,Electronics,Chargers,0.12,7.0,5.0,3.0,Normal,Fast
+SKU01024,Power Bank 10k,Electronics,Chargers,0.22,14.0,7.0,1.5,Hazardous,Fast
+SKU01025,Power Bank 20k,Electronics,Chargers,0.42,16.0,8.0,2.2,Hazardous,Medium
+SKU01026,Wireless Charger Pad,Electronics,Chargers,0.1,10.0,10.0,1.0,Normal,Medium
+SKU01027,Microwave Oven 20L,Electronics,Home Appliances,12.5,45.0,35.0,26.0,Fragile,Bulk
+SKU01028,Compact Refrigerator,Electronics,Home Appliances,22.0,50.0,48.0,85.0,Normal,Bulk
+SKU01029,Air Fryer 4L,Electronics,Home Appliances,5.2,32.0,32.0,38.0,Normal,Medium
+SKU01030,Electric Kettle 1.7L,Electronics,Home Appliances,1.1,22.0,16.0,24.0,Normal,Fast
+SKU01031,Toaster 2-Slice,Electronics,Home Appliances,1.4,26.0,16.0,18.0,Normal,Medium
+SKU01032,Blender Duo,Electronics,Home Appliances,3.1,20.0,20.0,40.0,Normal,Medium
+SKU01033,Vacuum Cleaner Cordless,Electronics,Home Appliances,4.5,110.0,25.0,20.0,Normal,Medium
+SKU01034,Robot Vacuum,Electronics,Home Appliances,3.8,35.0,35.0,9.0,Normal,Slow
+SKU01035,Humidifier 3L,Electronics,Home Appliances,1.5,20.0,20.0,30.0,Normal,Medium
+SKU01036,Smart Bulb RGB,Electronics,Smart Home,0.08,12.0,6.0,6.0,Fragile,Fast
+SKU01037,Smart Plug Pack,Electronics,Smart Home,0.15,12.0,8.0,6.0,Normal,Fast
+SKU01038,Smart Speaker Mini,Electronics,Smart Home,0.3,10.0,10.0,10.0,Normal,Fast
+SKU01039,Security Camera 2K,Electronics,Smart Home,0.25,12.0,8.0,8.0,Normal,Medium
+SKU01040,Sparkling Water 12-Pack,Groceries,Beverages,4.5,35.0,25.0,12.0,Normal,Fast
+SKU01041,Soda Can 24-Pack,Groceries,Beverages,9.2,40.0,28.0,13.0,Normal,Fast
+SKU01042,Energy Drink 4-Pack,Groceries,Beverages,1.6,13.0,13.0,16.0,Normal,Fast
+SKU01043,Orange Juice 1L,Groceries,Beverages,1.05,9.0,9.0,24.0,Cold,Fast
+SKU01044,Organic Whole Milk 1L,Groceries,Beverages,1.04,9.0,9.0,24.0,Cold,Fast
+SKU01045,Ground Coffee 1kg,Groceries,Beverages,1.02,20.0,12.0,8.0,Normal,Fast
+SKU01046,English Tea 100ct,Groceries,Beverages,0.25,15.0,8.0,7.0,Normal,Fast
+SKU01047,Bottled Water 24-Pack,Groceries,Beverages,12.5,40.0,26.0,23.0,Normal,Bulk
+SKU01048,Apple Cider 750ml,Groceries,Beverages,1.2,30.0,8.0,8.0,Fragile,Slow
+SKU01049,Potato Chips Family Pack,Groceries,Snacks,0.4,35.0,20.0,10.0,Normal,Fast
+SKU01050,Chocolate Bar 5-Pack,Groceries,Snacks,0.25,18.0,8.0,2.0,Normal,Fast
+SKU01051,Mixed Nuts 500g,Groceries,Snacks,0.52,16.0,10.0,6.0,Normal,Medium
+SKU01052,Granola Bars 12ct,Groceries,Snacks,0.45,20.0,14.0,6.0,Normal,Fast
+SKU01053,Popcorn Kernel Bag 1kg,Groceries,Snacks,1.01,24.0,15.0,5.0,Normal,Medium
+SKU01054,Salted Pretzels Party Size,Groceries,Snacks,0.5,38.0,22.0,12.0,Normal,Medium
+SKU01055,Fruit Snacks 24ct,Groceries,Snacks,0.6,22.0,16.0,8.0,Normal,Fast
+SKU01056,Canned Peeled Tomatoes 400g,Groceries,Canned Goods,0.45,8.0,8.0,11.0,Normal,Medium
+SKU01057,Canned Tuna 4-Pack,Groceries,Canned Goods,0.7,9.0,9.0,12.0,Normal,Fast
+SKU01058,Black Beans 400g,Groceries,Canned Goods,0.45,8.0,8.0,11.0,Normal,Medium
+SKU01059,Sweet Corn Can,Groceries,Canned Goods,0.45,8.0,8.0,11.0,Normal,Medium
+SKU01060,Chicken Noodle Soup Can,Groceries,Canned Goods,0.48,8.0,8.0,11.0,Normal,Fast
+SKU01061,Cheddar Cheese Block 500g,Groceries,Dairy,0.52,15.0,8.0,4.0,Cold,Medium
+SKU01062,Greek Yogurt 1kg,Groceries,Dairy,1.05,12.0,12.0,13.0,Cold,Fast
+SKU01063,Salted Butter Pack 250g,Groceries,Dairy,0.26,12.0,6.0,4.0,Cold,Fast
+SKU01064,Whipping Cream 500ml,Groceries,Dairy,0.52,8.0,8.0,12.0,Cold,Medium
+SKU01065,Parmesan Shredded 200g,Groceries,Dairy,0.22,15.0,15.0,3.0,Cold,Medium
+SKU01066,Frozen Pizza Pepperoni,Groceries,Frozen,0.65,30.0,30.0,3.0,Cold,Fast
+SKU01067,Ice Cream Pint Vanilla,Groceries,Frozen,0.45,10.0,10.0,11.0,Cold,Fast
+SKU01068,Frozen Peas 1kg,Groceries,Frozen,1.02,25.0,20.0,5.0,Cold,Medium
+SKU01069,Frozen Chicken Nuggets 1.5kg,Groceries,Frozen,1.55,30.0,22.0,6.0,Cold,Fast
+SKU01070,Frozen Hashbrowns 1kg,Groceries,Frozen,1.02,28.0,20.0,5.0,Cold,Medium
+SKU01071,Jasmine Rice 5kg,Groceries,Pantry,5.05,35.0,22.0,10.0,Normal,Medium
+SKU01072,Jasmine Rice 20kg,Groceries,Pantry,20.1,55.0,35.0,15.0,Normal,Bulk
+SKU01073,Spaghetti Pasta 1kg,Groceries,Pantry,1.02,30.0,8.0,3.0,Normal,Fast
+SKU01074,Extra Virgin Olive Oil 1L,Groceries,Pantry,1.4,28.0,8.0,8.0,Fragile,Medium
+SKU01075,Organic Honey Jar 500g,Groceries,Pantry,0.7,12.0,7.0,7.0,Fragile,Medium
+SKU01076,Creamy Peanut Butter 1kg,Groceries,Pantry,1.1,14.0,10.0,10.0,Normal,Fast
+SKU01077,Pure Maple Syrup 500ml,Groceries,Pantry,0.8,18.0,8.0,5.0,Fragile,Slow
+SKU01078,All-Purpose Flour 5kg,Groceries,Pantry,5.05,32.0,20.0,12.0,Normal,Medium
+SKU01079,Dish Soap Lemon 1L,Household,Cleaning,1.1,25.0,10.0,6.0,Hazardous,Fast
+SKU01080,All-Purpose Cleaner Spray,Household,Cleaning,0.85,28.0,10.0,5.0,Hazardous,Fast
+SKU01081,Glass Cleaner Spray,Household,Cleaning,0.82,28.0,10.0,5.0,Hazardous,Medium
+SKU01082,Cleaning Sponge 6-Pack,Household,Cleaning,0.05,20.0,12.0,6.0,Normal,Fast
+SKU01083,Drawstring Trash Bags 50ct,Household,Cleaning,0.9,22.0,12.0,12.0,Normal,Fast
+SKU01084,Disinfecting Wipes 80ct,Household,Cleaning,0.6,20.0,10.0,10.0,Normal,Fast
+SKU01085,Drain Clog Remover 1L,Household,Cleaning,1.25,26.0,9.0,9.0,Hazardous,Slow
+SKU01086,Microfiber Cloths 12-Pack,Household,Cleaning,0.3,24.0,18.0,4.0,Normal,Medium
+SKU01087,Ceramic Mug 350ml,Household,Kitchenware,0.35,12.0,9.0,10.0,Fragile,Medium
+SKU01088,Non-Stick Frying Pan 28cm,Household,Kitchenware,1.2,48.0,29.0,8.0,Normal,Medium
+SKU01089,Stainless Steel Chef Knife,Household,Kitchenware,0.25,34.0,5.0,2.0,Normal,Medium
+SKU01090,Glass Food Containers 6pc,Household,Kitchenware,2.2,25.0,18.0,15.0,Fragile,Medium
+SKU01091,Paper Plates 100-Pack,Household,Kitchenware,0.8,23.0,23.0,8.0,Normal,Fast
+SKU01092,Stainless Steel Cookware Set,Household,Kitchenware,8.5,45.0,30.0,25.0,Normal,Slow
+SKU01093,Liquid Detergent 5L,Household,Laundry,5.3,35.0,20.0,15.0,Hazardous,Medium
+SKU01094,Liquid Detergent 15L,Household,Laundry,15.8,45.0,30.0,25.0,Hazardous,Bulk
+SKU01095,Fabric Softener 3L,Household,Laundry,3.2,30.0,16.0,12.0,Hazardous,Medium
+SKU01096,Dryer Sheets 120ct,Household,Laundry,0.2,18.0,11.0,6.0,Normal,Fast
+SKU01097,Stain Remover Spray 500ml,Household,Laundry,0.58,24.0,8.0,5.0,Hazardous,Medium
+SKU01098,Powder Laundry Detergent 10kg,Household,Laundry,10.2,40.0,25.0,18.0,Hazardous,Bulk
+SKU01099,Plastic Storage Bin 30L,Household,Organization,1.5,45.0,35.0,28.0,Normal,Medium
+SKU01100,Plastic Storage Bin 80L,Household,Organization,3.2,65.0,45.0,40.0,Normal,Bulk
+SKU01101,Wooden Shoe Rack 3-Tier,Household,Organization,4.5,75.0,30.0,15.0,Normal,Slow
+SKU01102,Heavy Duty Shelving Unit,Household,Organization,28.5,90.0,45.0,15.0,Normal,Bulk
+SKU01103,Velvet Hangers 30-Pack,Household,Organization,1.2,45.0,24.0,8.0,Normal,Fast
+SKU01104,Underbed Storage Organizer,Household,Organization,0.8,75.0,40.0,15.0,Normal,Medium
+SKU01105,Bed Pillows 2-Pack,Household,Bedding,1.8,65.0,45.0,20.0,Normal,Fast
+SKU01106,Microfiber Queen Sheets Set,Household,Bedding,1.4,28.0,24.0,9.0,Normal,Medium
+SKU01107,Fleece Blanket Throw,Household,Bedding,0.9,32.0,28.0,8.0,Normal,Medium
+SKU01108,Down Alternative Comforter,Household,Bedding,3.5,45.0,38.0,22.0,Normal,Slow
+SKU01109,Memory Foam Mattress Topper,Household,Bedding,6.8,50.0,35.0,35.0,Normal,Slow
+SKU01110,Copy Paper Ream 500 Sheets,Office Supplies,Paper,2.3,30.0,22.0,5.0,Normal,Fast
+SKU01111,Copy Paper Case 5 Reams,Office Supplies,Paper,11.5,32.0,24.0,26.0,Normal,Bulk
+SKU01112,Lined Notebook A5 3-Pack,Office Supplies,Paper,0.6,21.0,15.0,3.0,Normal,Fast
+SKU01113,Sticky Notes 12-Pack,Office Supplies,Paper,0.4,16.0,8.0,8.0,Normal,Fast
+SKU01114,Spiral Sketchbook 9x12,Office Supplies,Paper,0.5,30.0,23.0,2.0,Normal,Medium
+SKU01115,Graph Paper Pads 4-Pack,Office Supplies,Paper,0.8,28.0,22.0,2.0,Normal,Medium
+SKU01116,Gel Pens Black 12-Pack,Office Supplies,Writing Instruments,0.12,14.0,7.0,2.0,Normal,Fast
+SKU01117,Highlighters Assorted 6ct,Office Supplies,Writing Instruments,0.08,14.0,8.0,2.0,Normal,Fast
+SKU01118,Permanent Markers 12-Pack,Office Supplies,Writing Instruments,0.18,15.0,10.0,3.0,Normal,Fast
+SKU01119,Mechanical Pencils 0.7mm,Office Supplies,Writing Instruments,0.1,14.0,6.0,2.0,Normal,Fast
+SKU01120,Ballpoint Pens Bulk 60ct,Office Supplies,Writing Instruments,0.45,18.0,12.0,6.0,Normal,Medium
+SKU01121,3-Ring Binder 2-Inch,Office Supplies,Binders,0.4,29.0,28.0,6.0,Normal,Medium
+SKU01122,3-Ring Binder 3-Inch,Office Supplies,Binders,0.5,29.0,29.0,8.0,Normal,Medium
+SKU01123,Clear Sheet Protectors 100ct,Office Supplies,Binders,0.5,29.0,23.0,2.0,Normal,Fast
+SKU01124,Tab Index Dividers 5-Tab,Office Supplies,Binders,0.08,29.0,22.0,0.5,Normal,Fast
+SKU01125,Dual-Sided Desk Mat,Office Supplies,Desk Accessories,0.4,80.0,40.0,0.2,Normal,Medium
+SKU01126,Metal Mesh Pen Cup,Office Supplies,Desk Accessories,0.1,10.0,8.0,8.0,Normal,Medium
+SKU01127,Full-Strip Desk Stapler,Office Supplies,Desk Accessories,0.35,16.0,6.0,4.0,Normal,Fast
+SKU01128,Paper Clips Tub 500ct,Office Supplies,Desk Accessories,0.22,8.0,8.0,5.0,Normal,Fast
+SKU01129,"Multipurpose Scissors 8""",Office Supplies,Desk Accessories,0.12,20.0,8.0,1.5,Normal,Fast
+SKU01130,Bubble Mailers #0 25-Pack,Office Supplies,Mail & Shipping,0.3,26.0,18.0,6.0,Normal,Fast
+SKU01131,Packing Tape Heavy Duty 3-Pack,Office Supplies,Mail & Shipping,0.7,12.0,12.0,15.0,Normal,Fast
+SKU01132,Cardboard Shipping Boxes 10ct,Office Supplies,Mail & Shipping,3.5,40.0,30.0,8.0,Normal,Medium
+SKU01133,Stretch Wrap Roll 500m,Office Supplies,Mail & Shipping,2.2,45.0,10.0,10.0,Normal,Medium
+SKU01134,Bubble Wrap Roll 30cm x 10m,Office Supplies,Mail & Shipping,0.4,30.0,30.0,30.0,Normal,Medium
+SKU01135,Shampoo Everyday 500ml,Personal Care,Hair Care,0.55,20.0,7.0,7.0,Normal,Fast
+SKU01136,Conditioner Hydrate 500ml,Personal Care,Hair Care,0.55,20.0,7.0,7.0,Normal,Fast
+SKU01137,Hair Styling Gel 250ml,Personal Care,Hair Care,0.28,15.0,6.0,6.0,Normal,Medium
+SKU01138,Ionic Hair Dryer 1875W,Personal Care,Hair Care,0.85,28.0,22.0,9.0,Fragile,Medium
+SKU01139,Hair Brush Detangler,Personal Care,Hair Care,0.12,23.0,7.0,4.0,Normal,Medium
+SKU01140,Toothpaste Mint 3-Pack,Personal Care,Oral Care,0.45,20.0,12.0,4.0,Normal,Fast
+SKU01141,Soft Toothbrushes 4-Pack,Personal Care,Oral Care,0.08,22.0,6.0,2.0,Normal,Fast
+SKU01142,Antiseptic Mouthwash 1L,Personal Care,Oral Care,1.1,26.0,10.0,8.0,Normal,Fast
+SKU01143,Waxed Dental Floss 2-Pack,Personal Care,Oral Care,0.04,8.0,5.0,2.0,Normal,Fast
+SKU01144,Electric Toothbrush,Personal Care,Oral Care,0.3,22.0,10.0,5.0,Fragile,Medium
+SKU01145,Face Moisturizer 100ml,Personal Care,Skincare,0.15,12.0,4.0,4.0,Normal,Fast
+SKU01146,Sunscreen SPF50 150ml,Personal Care,Skincare,0.18,15.0,5.0,4.0,Normal,Fast
+SKU01147,Daily Body Lotion 600ml,Personal Care,Skincare,0.68,22.0,9.0,6.0,Normal,Medium
+SKU01148,Lip Balm Pack of 4,Personal Care,Skincare,0.05,10.0,8.0,1.5,Normal,Fast
+SKU01149,Micellar Cleansing Water 400ml,Personal Care,Skincare,0.45,18.0,6.0,6.0,Normal,Medium
+SKU01150,Hand Sanitizer Gel 500ml,Personal Care,Hygiene,0.52,18.0,8.0,6.0,Hazardous,Fast
+SKU01151,Foaming Hand Soap Refill 1L,Personal Care,Hygiene,1.08,24.0,10.0,8.0,Normal,Fast
+SKU01152,Flushable Wet Wipes 3-Pack,Personal Care,Hygiene,0.8,20.0,12.0,12.0,Normal,Fast
+SKU01153,Cotton Swabs 500ct,Personal Care,Hygiene,0.15,10.0,10.0,8.0,Normal,Fast
+SKU01154,Isopropyl Rubbing Alcohol,Personal Care,Hygiene,0.48,18.0,7.0,7.0,Hazardous,Medium
+SKU01155,Moisturizing Body Wash 1L,Personal Care,Bath,1.1,24.0,9.0,8.0,Normal,Fast
+SKU01156,Gentle Bar Soap 4-Pack,Personal Care,Bath,0.48,18.0,10.0,4.0,Normal,Fast
+SKU01157,Cotton Bath Towel Large,Personal Care,Bath,0.6,35.0,25.0,5.0,Normal,Medium
+SKU01158,Exfoliating Loofah Sponge,Personal Care,Bath,0.04,12.0,12.0,12.0,Normal,Fast
+SKU01159,Epsom Salt Bag 3kg,Personal Care,Bath,3.05,30.0,20.0,8.0,Normal,Slow
+SKU01160,Phone X1 - Pro Max (256GB),Electronics,Mobile,0.22,15.8,7.4,0.8,Fragile,Fast
+SKU01161,Phone Lite - Red Edition,Electronics,Mobile,0.18,14.0,7.0,0.7,Fragile,Fast
+SKU01162,"Tablet 10 - Pro 12.9""",Electronics,Mobile,0.62,30.0,20.4,0.7,Fragile,Medium
+SKU01163,Wireless Mouse - Silent (Black),Electronics,Accessories,0.1,11.0,6.0,4.0,Normal,Fast
+SKU01164,Wireless Mouse - Silent (White),Electronics,Accessories,0.1,11.0,6.0,4.0,Normal,Fast
+SKU01165,Mechanical Keyboard - Wireless Version,Electronics,Accessories,0.84,44.0,14.0,4.0,Normal,Medium
+SKU01166,Bluetooth Earbuds - Active Noise Cancelling,Electronics,Accessories,0.04,6.0,4.0,3.0,Normal,Fast
+SKU01167,HDMI Cable 2m - Premium Braided 5m,Electronics,Cables,0.26,22.5,22.5,3.0,Normal,Medium
+SKU01168,USB-C Cable 1m - Fast Charge 2m,Electronics,Cables,0.09,12.0,12.0,1.2,Normal,Fast
+SKU01169,Lightning Cable 1m - Fast Charge 2m,Electronics,Cables,0.07,12.0,12.0,1.2,Normal,Fast
+SKU01170,Electric Kettle 1.7L - Glass Body,Electronics,Home Appliances,1.43,22.0,16.0,24.0,Fragile,Medium
+SKU01171,Toaster 2-Slice - 4-Slice Family,Electronics,Home Appliances,2.52,36.4,22.4,25.2,Normal,Medium
+SKU01172,Smart Bulb RGB - 3-Pack,Electronics,Smart Home,0.22,18.0,9.0,9.0,Fragile,Fast
+SKU01173,Sparkling Water 12-Pack - Lime Flavor,Groceries,Beverages,4.5,35.0,25.0,12.0,Normal,Fast
+SKU01174,Sparkling Water 12-Pack - Berry Flavor,Groceries,Beverages,4.5,35.0,25.0,12.0,Normal,Fast
+SKU01175,Soda Can 24-Pack - Diet Version,Groceries,Beverages,9.2,40.0,28.0,13.0,Normal,Fast
+SKU01176,Energy Drink 4-Pack - Sugar Free,Groceries,Beverages,1.6,13.0,13.0,16.0,Normal,Fast
+SKU01177,Orange Juice 1L - Pulp Free,Groceries,Beverages,1.05,9.0,9.0,24.0,Cold,Fast
+SKU01178,Ground Coffee 1kg - Dark Roast,Groceries,Beverages,1.02,20.0,12.0,8.0,Normal,Fast
+SKU01179,English Tea 100ct - Earl Grey,Groceries,Beverages,0.25,15.0,8.0,7.0,Normal,Medium
+SKU01180,Potato Chips Family Pack - Barbecue Flavor,Groceries,Snacks,0.4,35.0,20.0,10.0,Normal,Fast
+SKU01181,Potato Chips Family Pack - Sour Cream & Onion,Groceries,Snacks,0.4,35.0,20.0,10.0,Normal,Fast
+SKU01182,Chocolate Bar 5-Pack - Dark Chocolate,Groceries,Snacks,0.25,18.0,8.0,2.0,Normal,Fast
+SKU01183,Cheddar Cheese Block 500g - Sharp Cheddar,Groceries,Dairy,0.52,15.0,8.0,4.0,Cold,Medium
+SKU01184,Greek Yogurt 1kg - Strawberry Pack,Groceries,Dairy,1.1,12.0,12.0,13.0,Cold,Fast
+SKU01185,Frozen Pizza Pepperoni - Three Cheese Veggie,Groceries,Frozen,0.62,30.0,30.0,3.0,Cold,Fast
+SKU01186,Jasmine Rice 5kg - Brown Jasmine Rice,Groceries,Pantry,5.05,35.0,22.0,10.0,Normal,Medium
+SKU01187,Extra Virgin Olive Oil 1L - Organic Cold Pressed,Groceries,Pantry,1.4,28.0,8.0,8.0,Fragile,Medium
+SKU01188,Dish Soap Lemon 1L - Aloe Vera 1L,Household,Cleaning,1.1,25.0,10.0,6.0,Hazardous,Fast
+SKU01189,All-Purpose Cleaner Spray - Lavender Scent,Household,Cleaning,0.85,28.0,10.0,5.0,Hazardous,Fast
+SKU01190,Drawstring Trash Bags 50ct - 13 Gallon 80ct,Household,Cleaning,1.35,26.4,14.4,14.4,Normal,Fast
+SKU01191,Ceramic Mug 350ml - Set of 4,Household,Kitchenware,1.33,21.6,16.2,18.0,Fragile,Medium
+SKU01192,Liquid Detergent 5L - Free & Gentle (Sensitive),Household,Laundry,5.3,35.0,20.0,15.0,Hazardous,Medium
+SKU01193,Plastic Storage Bin 30L - Clear w/ Lid (3-Pack),Household,Organization,4.2,63.0,49.0,39.2,Normal,Bulk
+SKU01194,Bed Pillows 2-Pack - King Size 2-Pack,Household,Bedding,2.34,78.0,54.0,24.0,Normal,Medium
+SKU01195,Copy Paper Ream 500 Sheets - Recycled Paper,Office Supplies,Paper,2.3,30.0,22.0,5.0,Normal,Fast
+SKU01196,Lined Notebook A5 3-Pack - Hardcover Single,Office Supplies,Paper,0.48,21.0,15.0,3.0,Normal,Fast
+SKU01197,Gel Pens Black 12-Pack - Blue Ink 12-Pack,Office Supplies,Writing Instruments,0.12,14.0,7.0,2.0,Normal,Fast
+SKU01198,Gel Pens Black 12-Pack - Assorted Colors 24ct,Office Supplies,Writing Instruments,0.22,18.2,9.1,2.6,Normal,Medium
+SKU01199,Shampoo Everyday 500ml - Tea Tree Scalp Care,Personal Care,Hair Care,0.55,20.0,7.0,7.0,Normal,Fast
+SKU01200,Conditioner Hydrate 500ml - Tea Tree Conditioner,Personal Care,Hair Care,0.55,20.0,7.0,7.0,Normal,Fast

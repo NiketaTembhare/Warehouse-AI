@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+pandas
+python-dotenv
+python-jose[cryptography]
+passlib[bcrypt]
+langchain
+langchain-google-genai
+langchain-community
+chromadb
+sentence-transformers
+networkx
+ortools
+langchain-groq

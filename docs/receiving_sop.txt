@@ -1,0 +1,10 @@
+RECEIVING SOP - WAREHOUSE STANDARD OPERATING PROCEDURE
+
+1. All incoming shipments must be inspected within 2 hours of arrival.
+2. Verify item count against purchase order before unloading.
+3. Damaged items during receiving must be photographed and tagged immediately.
+4. Damaged goods must be moved to Zone D (damaged holding area) within 2 hours.
+5. Create a damage report with supplier name, item details, and damage description.
+6. Notify the warehouse manager immediately for damaged shipments above 10 units.
+7. All received items must be scanned into the WMS before leaving the receiving dock.
+8. Temperature-sensitive items must be moved to cold storage within 30 minutes.
