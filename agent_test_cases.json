@@ -1,0 +1,92 @@
+[
+    {
+        "id": "NL2SQL_001",
+        "agent_type": "NL2SQL",
+        "question": "Which SKU has the highest order count, and what is its order count?",
+        "answer": "The SKU with the highest order count is SKU01141, and its order count is 244.",
+        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
+    },
+    {
+        "id": "NL2SQL_002",
+        "agent_type": "NL2SQL",
+        "question": "How many warehouse nodes are located in the Fast zone?",
+        "answer": "20",
+        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
+    },
+    {
+        "id": "NL2SQL_003",
+        "agent_type": "NL2SQL",
+        "question": "List the top 3 categories of SKUs based on the number of SKUs.",
+        "answer": "The top 3 categories of SKUs based on the number of SKUs are Groceries with 54 SKUs, Electronics with 52 SKUs, and Household with 38 SKUs.",
+        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
+    },
+    {
+        "id": "NL2SQL_004",
+        "agent_type": "NL2SQL",
+        "question": "What is the average weight in kg of SKUs in the category Electronics?",
+        "answer": "The average weight of SKUs in the category Electronics is 1.44 kg.",
+        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
+    },
+    {
+        "id": "NL2SQL_005",
+        "agent_type": "NL2SQL",
+        "question": "How many unique orders have a status of Pending?",
+        "answer": "0",
+        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
+    },
+    {
+        "id": "RAG_001",
+        "agent_type": "RAG",
+        "question": "How should heavy items above 15kg be stored according to policy?",
+        "answer": "Heavy items above 15kg must be stored at ground level only.",
+        "sources_or_query": [
+            "slotting_policy.txt",
+            "packing_sop.txt",
+            "safety_guidelines.txt"
+        ]
+    },
+    {
+        "id": "RAG_002",
+        "agent_type": "RAG",
+        "question": "What is the storage policy for fragile items in the warehouse?",
+        "answer": "Fragile items must be stored on lower shelves below 1.5 meters height.",
+        "sources_or_query": [
+            "slotting_policy.txt",
+            "packing_sop.txt",
+            "receiving_sop.txt"
+        ]
+    },
+    {
+        "id": "RAG_003",
+        "agent_type": "RAG",
+        "question": "Can cold storage items be moved to ambient temperature zones?",
+        "answer": "No, cold storage items must never be moved to ambient temperature zones.",
+        "sources_or_query": [
+            "slotting_policy.txt",
+            "receiving_sop.txt",
+            "packing_sop.txt"
+        ]
+    },
+    {
+        "id": "RAG_004",
+        "agent_type": "RAG",
+        "question": "When should re-slotting be scheduled to avoid disruption?",
+        "answer": "Re-slotting should be scheduled during Night shift to avoid disruption.",
+        "sources_or_query": [
+            "slotting_policy.txt",
+            "receiving_sop.txt",
+            "packing_sop.txt"
+        ]
+    },
+    {
+        "id": "RAG_005",
+        "agent_type": "RAG",
+        "question": "Is manager approval required before re-slotting is permitted?",
+        "answer": "Yes, manager digital approval in the system is required before re-slotting is permitted, as stated in point 6 of the SLOTTING POLICY.",
+        "sources_or_query": [
+            "slotting_policy.txt",
+            "receiving_sop.txt",
+            "packing_sop.txt"
+        ]
+    }
+]

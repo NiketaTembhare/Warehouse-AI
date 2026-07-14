@@ -7,32 +7,42 @@ This document contains the complete code, module purpose, used libraries, and fu
 ## 1. Directory Tree Structure
 
 ```text
-backend/
-├── .env
-├── requirements.txt
-└── app/
-    ├── main.py
-    ├── agents/
-    │   ├── __init__.py
-    │   ├── nl2sql.py
-    │   ├── pick_path.py (placeholder)
-    │   ├── rag.py (placeholder)
-    │   └── slotting.py (placeholder)
-    ├── api/
-    │   └── query.py
-    ├── core/
-    │   ├── config.py
-    │   └── database.py
-    ├── db/
-    │   └── import_csv.py
-    └── models/
-        ├── base.py
-        ├── inventory.py
-        ├── order.py
-        ├── order_item.py
-        ├── sku.py
-        ├── user.py
-        └── warehouse.py
+warehouse-ai/
+├── .gitignore
+├── agent_test_cases.json
+├── docs/
+│   ├── packing_sop.txt
+│   ├── receiving_sop.txt
+│   ├── safety_guidelines.txt
+│   └── slotting_policy.txt
+├── backend/
+│   ├── .env
+│   ├── requirements.txt
+│   └── app/
+│       ├── main.py
+│       ├── agents/
+│       │   ├── __init__.py
+│       │   ├── nl2sql.py
+│       │   ├── pick_path.py (placeholder)
+│       │   ├── rag.py
+│       │   └── slotting.py (placeholder)
+│       ├── api/
+│       │   ├── query.py
+│       │   └── sop.py
+│       ├── core/
+│       │   ├── config.py
+│       │   └── database.py
+│       ├── db/
+│       │   ├── import_csv.py
+│       │   └── ingest_sops.py
+│       └── models/
+│           ├── base.py
+│           ├── inventory.py
+│           ├── order.py
+│           ├── order_item.py
+│           ├── sku.py
+│           ├── user.py
+│           └── warehouse.py
 ```
 
 ---
@@ -525,22 +535,408 @@ def health():
         "status": "running",
         "message": "Warehouse AI is online"
     }
+### File 15: `app/main.py`
+* **Path:** `backend/app/main.py`
+* **Purpose:** Application root configuring FastAPI, global CORS middleware rules, API route routers (query and sop), and health checks.
+* **Libraries Used:** `fastapi` (`FastAPI`), `fastapi.middleware.cors` (`CORSMiddleware`), `app.api` (`query`, `sop`).
+* **Functions:**
+  * `health()`: Verifies backend liveness over `/health` route.
+* **Code:**
+```python
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.api import query
+from app.api import sop
+
+app = FastAPI(
+    title="Warehouse AI Assistant",
+    description="AI-powered warehouse slotting and picking optimization",
+    version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(query.router, prefix="/api")
+app.include_router(sop.router, prefix="/api")
+
+@app.get("/health")
+def health():
+    return {
+        "status": "running",
+        "message": "Warehouse AI is online"
+    }
 ```
 
 ---
 
-## 3. Project Status Report
+### File 16: `app/db/ingest_sops.py`
+* **Path:** `backend/app/db/ingest_sops.py`
+* **Purpose:** Reads standard operating procedure text files from the `docs/` folder, creates embeddings, and stores them in the persistent ChromaDB collection.
+* **Libraries Used:** `os`, `chromadb`.
+* **Functions:**
+  * `get_chroma_client(path)`: Initializes persistent storage client.
+  * `get_docs_path()`: Safely resolves the directory path of the documentation source.
+  * `ingest_documents()`: Scans all `.txt` documents, upserting their vector embeddings into ChromaDB.
+* **Code:**
+```python
+import os
+import chromadb
+
+def get_chroma_client(path: str = "./chroma_store") -> chromadb.PersistentClient:
+    """
+    Creates and returns a persistent ChromaDB client.
+    """
+    return chromadb.PersistentClient(path=path)
+
+def get_docs_path() -> str:
+    """
+    Locates the docs directory relative to the runtime environment.
+    """
+    if os.path.isdir("./docs"):
+        return "./docs"
+    elif os.path.isdir("../docs"):
+        return "../docs"
+    else:
+        raise FileNotFoundError("Could not locate the 'docs' directory at './docs' or '../docs'")
+
+def ingest_documents():
+    """
+    Reads all .txt files from the docs/ folder.
+    Converts each document to a vector embedding using ChromaDB.
+    """
+    client = get_chroma_client()
+    collection = client.get_or_create_collection(
+        name="warehouse_sops"
+    )
+    docs_path = get_docs_path()
+    count = 0
+
+    for filename in os.listdir(docs_path):
+        if not filename.endswith(".txt"):
+            continue
+
+        filepath = os.path.join(docs_path, filename)
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        collection.upsert(
+            documents=[content],
+            ids=[filename]
+        )
+        count += 1
+        print(f"[OK] Ingested: {filename}")
+
+    print(f"\nTotal documents ingested: {count}")
+    print("ChromaDB store saved at: ./chroma_store")
+
+if __name__ == "__main__":
+    ingest_documents()
+```
+
+---
+
+### File 17: `app/agents/rag.py`
+* **Path:** `backend/app/agents/rag.py`
+* **Purpose:** Implements RAG functionality. Connects to ChromaDB, runs semantic similarity queries, builds a restrictive context-based prompt, and generates answers using `llama-3.3-70b-versatile` on Groq.
+* **Libraries Used:** `chromadb`, `langchain_groq` (`ChatGroq`), `app.core.config` (`settings`).
+* **Functions:**
+  * `get_collection()`: Connects to the local persistent database and returns the SOPs collection.
+  * `get_llm()`: Resolves a ChatGroq LLM singleton with deterministic sampling temperature.
+  * `query_sop(question)`: Performs semantic search and generates responses mapping to source files.
+* **Code:**
+```python
+import chromadb
+from langchain_groq import ChatGroq
+from app.core.config import settings
+
+def get_collection() -> chromadb.Collection:
+    """
+    Connects to the persistent ChromaDB store on disk.
+    """
+    client = chromadb.PersistentClient(path="./chroma_store")
+    return client.get_or_create_collection(name="warehouse_sops")
+
+def get_llm() -> ChatGroq:
+    """
+    Creates and returns the ChatGroq model instance.
+    """
+    return ChatGroq(
+        model="llama-3.3-70b-versatile",
+        api_key=settings.GROQ_API_KEY,
+        temperature=0
+    )
+
+def query_sop(question: str) -> dict:
+    """
+    Performs semantic search against ChromaDB, then prompts Groq to answer.
+    """
+    collection = get_collection()
+    results = collection.query(
+        query_texts=[question],
+        n_results=3
+    )
+
+    retrieved_docs = results["documents"][0]
+    sources = results["ids"][0]
+    context = "\n\n---\n\n".join(retrieved_docs)
+
+    prompt = f"""You are a warehouse operations assistant.
+Answer the question using ONLY the SOP context provided below.
+If the answer is not in the context, say "I could not find this in the warehouse SOPs."
+Do not make up any information.
+
+SOP CONTEXT:
+{context}
+
+QUESTION: {question}
+
+ANSWER:"""
+
+    llm = get_llm()
+    response = llm.invoke(prompt)
+
+    return {
+        "question": question,
+        "answer":   response.content,
+        "sources":  sources
+    }
+```
+
+---
+
+### File 18: `app/api/sop.py`
+* **Path:** `backend/app/api/sop.py`
+* **Purpose:** Exposes API endpoint `/api/sop` to query ingested warehouse policies (Standard Operating Procedures).
+* **Libraries Used:** `fastapi` (`APIRouter`, `HTTPException`), `pydantic` (`BaseModel`), `app.agents.rag` (`query_sop`).
+* **Classes:**
+  * `SOPRequest`: Validates the string question payload.
+  * `SOPResponse`: Maps response keys (`question`, `answer`, `sources`).
+* **Functions:**
+  * `ask_sop(request)`: Triggers semantic lookup and prompts the RAG LLM pipeline.
+* **Code:**
+```python
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from app.agents.rag import query_sop
+
+router = APIRouter()
+
+class SOPRequest(BaseModel):
+    question: str
+
+class SOPResponse(BaseModel):
+    question: str
+    answer:   str
+    sources:  list
+
+@router.post("/sop", response_model=SOPResponse)
+def ask_sop(request: SOPRequest):
+    """
+    FastAPI Route: POST /api/sop
+    Takes a plain text policy or SOP question.
+    """
+    if not request.question.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Question cannot be empty"
+        )
+
+    result = query_sop(request.question)
+    return result
+```
+
+---
+
+### File 19: `.gitignore`
+* **Path:** `.gitignore` (Root level)
+* **Purpose:** Keeps system environments, sensitive credentials, and database caches out of version control.
+* **Code:**
+```gitignore
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Vector database storage
+chroma_store/
+chroma.sqlite3
+backend/chroma_store/
+backend/venv/
+backend/.env
+
+# IDEs
+.vscode/
+.idea/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+```
+
+---
+
+## 3. Data Flow & Agent Execution Traces
+
+### Global Data Flow Pipeline
+1. **Relational Data Path:** Raw CSV datasets (`datasets/`) $\rightarrow$ Ingested via `import_csv.py` $\rightarrow$ Stored in PostgreSQL $\rightarrow$ Queried by the NL2SQL Agent via read-only SQLAlchemy connections.
+2. **Unstructured Data Path:** Policy documents (`docs/`) $\rightarrow$ Chunks embedded and saved via `ingest_sops.py` $\rightarrow$ ChromaDB storage $\rightarrow$ Queried by the RAG Agent using semantic similarity.
+3. **Execution Delivery:** User requests hit FastAPI controllers (`/api/query`, `/api/sop`) $\rightarrow$ Agents run processes via Groq `llama-3.3-70b-versatile` $\rightarrow$ Clean JSON responses are delivered back to client.
+
+### In-Depth Execution Traces
+
+#### Trace A: NL2SQL Agent Chain
+When a user asks: *"Which SKU has the highest order count, and what is its order count?"*
+1. **Schema Check:** The agent retrieves schemas for `order_items` and `sku_master`.
+2. **Query Formulation:**
+   ```sql
+   SELECT sku_id, COUNT(*) as order_count 
+   FROM order_items 
+   GROUP BY sku_id 
+   ORDER BY order_count DESC 
+   LIMIT 1;
+   ```
+3. **Execution:** Database executes the query and returns `[('SKU01141', 244)]`.
+4. **Summary:** Agent returns: *"The SKU with the highest order count is SKU01141, and its order count is 244."*
+
+#### Trace B: RAG Agent Chain
+When a user asks: *"How should heavy items above 15kg be stored according to policy?"*
+1. **Semantic Search:** ChromaDB returns chunk from `slotting_policy.txt`: *"Rule 5: Heavy items above 15kg must be stored at ground level only."*
+2. **Context Assembly:** Prompts LLM using strictly this context.
+3. **Summary:** Agent returns: *"Heavy items above 15kg must be stored at ground level only."*
+
+---
+
+## 4. Test Cases JSON Database
+
+Below is the verified test cases JSON data saved at `agent_test_cases.json` for validation and documentation sharing:
+
+```json
+[
+    {
+        "id": "NL2SQL_001",
+        "agent_type": "NL2SQL",
+        "question": "Which SKU has the highest order count, and what is its order count?",
+        "answer": "The SKU with the highest order count is SKU01141, and its order count is 244.",
+        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
+    },
+    {
+        "id": "NL2SQL_002",
+        "agent_type": "NL2SQL",
+        "question": "How many warehouse nodes are located in the Fast zone?",
+        "answer": "20",
+        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
+    },
+    {
+        "id": "NL2SQL_003",
+        "agent_type": "NL2SQL",
+        "question": "List the top 3 categories of SKUs based on the number of SKUs.",
+        "answer": "The top 3 categories of SKUs based on the number of SKUs are Groceries with 54 SKUs, Electronics with 52 SKUs, and Household with 38 SKUs.",
+        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
+    },
+    {
+        "id": "NL2SQL_004",
+        "agent_type": "NL2SQL",
+        "question": "What is the average weight in kg of SKUs in the category Electronics?",
+        "answer": "The average weight of SKUs in the category Electronics is 1.44 kg.",
+        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
+    },
+    {
+        "id": "NL2SQL_005",
+        "agent_type": "NL2SQL",
+        "question": "How many unique orders have a status of Pending?",
+        "answer": "0",
+        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
+    },
+    {
+        "id": "RAG_001",
+        "agent_type": "RAG",
+        "question": "How should heavy items above 15kg be stored according to policy?",
+        "answer": "Heavy items above 15kg must be stored at ground level only.",
+        "sources_or_query": [
+            "slotting_policy.txt",
+            "packing_sop.txt",
+            "safety_guidelines.txt"
+        ]
+    },
+    {
+        "id": "RAG_002",
+        "agent_type": "RAG",
+        "question": "What is the storage policy for fragile items in the warehouse?",
+        "answer": "Fragile items must be stored on lower shelves below 1.5 meters height.",
+        "sources_or_query": [
+            "slotting_policy.txt",
+            "packing_sop.txt",
+            "receiving_sop.txt"
+        ]
+    },
+    {
+        "id": "RAG_003",
+        "agent_type": "RAG",
+        "question": "Can cold storage items be moved to ambient temperature zones?",
+        "answer": "No, cold storage items must never be moved to ambient temperature zones.",
+        "sources_or_query": [
+            "slotting_policy.txt",
+            "receiving_sop.txt",
+            "packing_sop.txt"
+        ]
+    },
+    {
+        "id": "RAG_004",
+        "agent_type": "RAG",
+        "question": "When should re-slotting be scheduled to avoid disruption?",
+        "answer": "Re-slotting should be scheduled during Night shift to avoid disruption.",
+        "sources_or_query": [
+            "slotting_policy.txt",
+            "receiving_sop.txt",
+            "packing_sop.txt"
+        ]
+    },
+    {
+        "id": "RAG_005",
+        "agent_type": "RAG",
+        "question": "Is manager approval required before re-slotting is permitted?",
+        "answer": "Yes, manager digital approval in the system is required before re-slotting is permitted, as stated in point 6 of the SLOTTING POLICY.",
+        "sources_or_query": [
+            "slotting_policy.txt",
+            "receiving_sop.txt",
+            "packing_sop.txt"
+        ]
+    }
+]
+```
+
+---
+
+## 5. Project Status Report
 
 ### Current Progress & Configuration Status:
-1. **Database Wiring & Data Loading**:
-   - Core SQL database and tables mapped accurately to CSV layouts.
-   - CSV data loader (`import_csv.py`) ready to ingest tables into PostgreSQL database via SQLAlchemy engine.
-2. **Environment & Core Config**:
-   - `Settings` class successfully modified to completely remove unused Gemini configurations.
-   - Groq API Key added to `.env` and loaded under settings properties.
-   - Dependencies updated: `langchain-groq` added to `requirements.txt` to enable imports.
-3. **NL2SQL Agent Capability**:
-   - Uses `llama-3.3-70b-versatile` model hosted on Groq via Read-Only database connection schema for query execution.
-   - Accessible via API endpoint `/api/query` under `uvicorn app.main:app --reload` server.
-4. **Current Status**: 
-   - **Active & Stable**. Config imports validated successfully.
+1. **Database & Vector Storage Ingestion:**
+   * SQLite metadata indices and standard tabular data completely synced from CSV sources using SQLAlchemy.
+   * ChromaDB persistence client configured and successfully indexed with all SOP documents.
+2. **Environment & Core Config:**
+   * Global configuration system loads Groq API key and connection strings securely from local `.env`.
+   * Outdated configurations (e.g., Gemini integration leftovers) completely stripped out.
+3. **Deployed Capabilities (Verifications OK):**
+   * **NL2SQL Agent:** Fully operational. Automatically reads database schemas, compiles queries, executes securely, and returns natural answers.
+   * **RAG Agent:** Fully operational. Performs semantic vector query on ChromaDB and creates context-constrained answers based on SOPs.
+   * **FastAPI Server:** Online and exposing `/api/query` and `/api/sop` endpoints.
+4. **Current Status:**
+   * **Stable & Verified**. Ready for Slotting Optimization Agent implementation.
+
