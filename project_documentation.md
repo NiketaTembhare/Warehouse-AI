@@ -1,414 +1,153 @@
-# Warehouse AI Project Documentation & Status Report
+# PROJECT DOCUMENTATION
 
-This document contains the complete code, module purpose, used libraries, and functional descriptions of every file in the project, followed by a **Project Status Report**.
+## SECTION 1 — PROJECT OVERVIEW
+Warehouse AI is an intelligent assistant designed to streamline warehouse operations using natural language queries and AI-driven document retrieval. It solves the problem of warehouse staff needing complex database knowledge to find inventory or policy information by allowing them to ask simple questions in plain English. The system is primarily used by warehouse managers who need quick insights into inventory levels, order statuses, and slotting metrics, as well as pickers and staff who need to reference safety guidelines and packing standard operating procedures (SOPs).
 
----
-
-## 1. Directory Tree Structure
-
+## SECTION 2 — COMPLETE FOLDER STRUCTURE
 ```text
 warehouse-ai/
-├── .gitignore
-├── agent_test_cases.json
+├── .gitignore                    # Prevents secrets, virtual environments, and caches from entering version control
+├── agent_test_cases.json         # JSON file containing sample test questions and expected SQL queries for agent testing
+├── project_documentation.md      # This documentation file explaining the project
 ├── docs/
-│   ├── packing_sop.txt
-│   ├── receiving_sop.txt
-│   ├── safety_guidelines.txt
-│   └── slotting_policy.txt
-├── backend/
-│   ├── .env
-│   ├── requirements.txt
-│   └── app/
-│       ├── main.py
-│       ├── agents/
-│       │   ├── __init__.py
-│       │   ├── nl2sql.py
-│       │   ├── pick_path.py (placeholder)
-│       │   ├── rag.py
-│       │   └── slotting.py (placeholder)
-│       ├── api/
-│       │   ├── query.py
-│       │   └── sop.py
-│       ├── core/
-│       │   ├── config.py
-│       │   └── database.py
-│       ├── db/
-│       │   ├── import_csv.py
-│       │   └── ingest_sops.py
-│       └── models/
-│           ├── base.py
-│           ├── inventory.py
-│           ├── order.py
-│           ├── order_item.py
-│           ├── sku.py
-│           ├── user.py
-│           └── warehouse.py
+│   ├── packing_sop.txt           # Text file containing rules for packing orders
+│   ├── receiving_sop.txt         # Text file containing rules for receiving goods
+│   ├── safety_guidelines.txt     # Text file containing warehouse safety protocols
+│   └── slotting_policy.txt       # Text file containing warehouse slotting policies
+└── backend/
+    ├── .env                      # Stores all secrets and API keys (Database URL, Groq API Key)
+    ├── requirements.txt          # All Python packages needed to run the backend
+    ├── chroma_store/             # Directory where ChromaDB stores its persistent vector database files
+    ├── datasets/                 # Folder containing all raw CSV files (inventory, orders, skus, etc.) for initial data import
+    └── app/
+        ├── main.py               # FastAPI entry point, registers all routes and middlewares
+        ├── agents/
+        │   ├── __init__.py       # Marks agents directory as a Python package
+        │   ├── nl2sql.py         # AI Agent that converts natural language to SQL queries using LangChain and Groq
+        │   ├── rag.py            # Retrieval Augmented Generation logic for querying SOPs via ChromaDB
+        │   ├── pick_path.py      # Placeholder for future optimal picking path agent
+        │   └── slotting.py       # Placeholder for future slotting optimization agent
+        ├── api/
+        │   ├── __init__.py       # API Package Initializer
+        │   ├── query.py          # API route handler for /api/query (natural language database questions)
+        │   └── sop.py            # API route handler for /api/sop (SOP policy questions)
+        ├── core/
+        │   ├── config.py         # Loads and exposes environment variables from .env as typed Python objects
+        │   └── database.py       # Configures SQLAlchemy engine and database session makers
+        ├── db/
+        │   ├── __init__.py       # Marks db directory as a Python package
+        │   ├── import_csv.py     # Script to read CSV files from datasets/ and insert them into the PostgreSQL database
+        │   └── ingest_sops.py    # Script to read text files from docs/ and insert them as vectors into ChromaDB
+        └── models/
+            ├── base.py           # Defines the SQLAlchemy Declarative Base that all models inherit from
+            ├── inventory.py      # Database model for tracking SKU quantities across warehouse nodes
+            ├── order.py          # Database model for customer orders
+            ├── order_item.py     # Database model mapping specific SKUs to orders
+            ├── sku.py            # Database model for product Stock Keeping Units and dimensions
+            ├── user.py           # Database model for application users and role-based permissions
+            └── warehouse.py      # Database model for physical warehouse nodes and connecting paths
 ```
 
----
-
-## 2. File-by-File Documentation
-
-### File 1: `.env`
-* **Path:** `backend/.env`
-* **Purpose:** Stores sensitive environment variables and credentials (database connection URLs, API keys, security keys) configuration-free.
-* **Libraries/Technologies:** Dotenv format.
-* **Code:**
-```env
-DATABASE_URL=postgresql://username:password@localhost:5432/warehouse_db
-GROQ_API_KEY=your_groq_api_key_here
-SECRET_KEY=your_secret_key_here
-READ_ONLY_DATABASE_URL=postgresql://read_only_username:read_only_password@localhost:5432/warehouse_db
-```
-
----
-
-### File 2: `requirements.txt`
-* **Path:** `backend/requirements.txt`
-* **Purpose:** Lists all Python third-party dependencies required to run the application.
-* **Libraries/Technologies:** Standard Pip requirement format.
-* **Code:**
+## SECTION 3 — HOW ALL FILES CONNECT
 ```text
-fastapi
-uvicorn
-sqlalchemy
-psycopg2-binary
-pandas
-python-dotenv
-python-jose[cryptography]
-passlib[bcrypt]
-langchain
-langchain-google-genai
-langchain-community
-chromadb
-sentence-transformers
-networkx
-ortools
-langchain-groq
+.env → config.py → database.py → import_csv.py
+.env → config.py → database.py
+.env → config.py → nl2sql.py → query.py → main.py
+.env → config.py → rag.py → sop.py → main.py
+
+docs/*.txt → ingest_sops.py → chroma_store/
+chroma_store/ → rag.py
+
+base.py → inventory.py
+base.py → order.py
+base.py → order_item.py
+base.py → sku.py
+base.py → user.py
+base.py → warehouse.py
 ```
 
----
+## SECTION 4 — KEY TECHNICAL CONCEPTS USED
 
-### File 3: `app/core/config.py`
-* **Path:** `backend/app/core/config.py`
-* **Purpose:** Loads configuration options from the environment/`.env` file and presents them as a typed python object.
-* **Libraries Used:** `os`, `python-dotenv` (`load_dotenv`).
-* **Classes:**
-  * `Settings`: Holds configuration keys.
-* **Key Variable:**
-  * `settings`: Singleton instance of `Settings`.
-* **Code:**
+**4.1 SQLAlchemy ORM**
+What it is: An Object-Relational Mapper that lets you interact with a SQL database using Python classes instead of writing raw SQL strings.
+Why we use it: It makes database code safer, more readable, and protects against SQL injection.
+Example: Instead of `SELECT * FROM users WHERE id=1`, we write a class `User(Base)` and query it via `session.query(User).filter_by(id=1).first()`.
+
+**4.2 FastAPI + Pydantic**
+What they do: FastAPI is a modern framework for building high-performance web APIs. Pydantic is a data validation library that FastAPI uses to ensure incoming data matches the required format.
+Why BaseModel matters: Inheriting from `BaseModel` defines a strict schema for requests and responses. If a user sends invalid data, Pydantic automatically rejects it with a helpful error before it even reaches your code.
+Example: 
 ```python
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-class Settings:
-    DATABASE_URL          = os.getenv("DATABASE_URL")
-    READ_ONLY_DATABASE_URL = os.getenv("READ_ONLY_DATABASE_URL")
-    GROQ_API_KEY          = os.getenv("GROQ_API_KEY")
-    SECRET_KEY            = os.getenv("SECRET_KEY")
-
-settings = Settings()
+class QueryRequest(BaseModel):
+    question: str  # The API will automatically reject requests missing this string field
 ```
 
----
+**4.3 LangChain SQL Agent**
+What it does: It bridges a Large Language Model (LLM) to a SQL database, allowing the LLM to write and execute SQL queries based on user questions.
+Step by Step: 
+1. User asks "How many orders are pending?"
+2. Agent reads the database schema.
+3. Agent writes a SQL query: `SELECT COUNT(*) FROM orders WHERE status='pending';`
+4. Agent executes the query on the database.
+5. Agent reads the result (e.g., 5) and generates a human-friendly answer: "There are 5 pending orders."
 
-### File 4: `app/core/database.py`
-* **Path:** `backend/app/core/database.py`
-* **Purpose:** Configures the SQLAlchemy database engine, session makers, and database session generator functions.
-* **Libraries Used:** `sqlalchemy` (`create_engine`, `sessionmaker`), `app.core.config` (`settings`).
-* **Functions:**
-  * `get_db()`: Generates local transactional database sessions and closes them cleanly upon completion.
-* **Code:**
+**4.4 ChromaDB Vector Search**
+What embeddings are: Arrays of numbers (vectors) that represent the deeper semantic meaning of text.
+How semantic search works: Unlike keyword search (which only finds exact word matches), semantic search maps concepts closer together mathematically.
+Example: A search for "damaged goods" will find documents containing "broken items" because their vectors point to a similar conceptual location in the database.
+
+**4.5 RAG (Retrieval Augmented Generation)**
+What it is: A technique where the system first retrieves relevant documents from a database (like ChromaDB) and then feeds those specific documents to the LLM to generate an answer.
+Why it prevents hallucination: The LLM is strictly instructed to only use the provided context, preventing it from inventing fake facts.
+Compare: Without RAG, asking "What is our safety policy?" makes the LLM guess based on general internet knowledge. With RAG, the LLM reads your exact `safety_guidelines.txt` before answering.
+
+**4.6 Groq LLM**
+What it is: An extremely fast inference engine running the Llama 3 LLM. 
+Why temperature=0 matters: A temperature of 0 makes the model completely deterministic, removing randomness. This forces the model to give the most logical, factual answer every time, which is critical for accurate SQL generation.
+Why we use it for text generation only: LLMs are language engines, not calculators. They are bad at doing complex math reliably, so we use them to write SQL (text) and let the database engine execute the math.
+
+**4.7 Read-Only Database User**
+What warehouse_reader is: A database user account with restricted permissions (`SELECT` only).
+Why it exists: We pass this user's credentials to the LangChain SQL Agent. Since the LLM is autonomously generating and executing SQL, we cannot trust it with administrative access.
+What happens if someone tries DELETE/DROP: If a user asks "Delete all orders," the agent might try to generate a `DROP TABLE orders` query. The PostgreSQL database will block it with a "Permission Denied" error, protecting the data.
+
+## SECTION 5 — AGENT 1: NL2SQL AGENT (COMPLETE)
+
+**5.1 Purpose**
+This agent solves the problem of data accessibility by allowing warehouse managers to query real-time database metrics (like inventory levels and order statuses) using natural conversational English, eliminating the need to write complex SQL scripts.
+
+**5.2 Full code of nl2sql.py with inline comments**
 ```python
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from app.core.config import settings
-
-engine = create_engine(settings.DATABASE_URL)
-
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-```
-
----
-
-### File 5: `app/models/base.py`
-* **Path:** `backend/app/models/base.py`
-* **Purpose:** Defines the shared declarative Base model class from which all SQLAlchemy database tables inherit.
-* **Libraries Used:** `sqlalchemy.ext.declarative` (`declarative_base`).
-* **Code:**
-```python
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-```
-
----
-
-### File 6: `app/models/user.py`
-* **Path:** `backend/app/models/user.py`
-* **Purpose:** Database model representing application users and roles.
-* **Libraries Used:** `sqlalchemy` (`Column`, `Integer`, `String`), `app.models.base` (`Base`).
-* **Classes:**
-  * `User`: Class mapping to `"user"` table. Contains user profiles, password hashes, and permissions.
-* **Code:**
-```python
-from sqlalchemy import Column, Integer, String
-from app.models.base import Base
-
-class User(Base):
-    __tablename__ = "user"
-
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    role = Column(String, default="Picker", nullable=False)  # Options: Admin, Manager, Picker
-```
-
----
-
-### File 7: `app/models/warehouse.py`
-* **Path:** `backend/app/models/warehouse.py`
-* **Purpose:** Models nodes (locations) and connecting paths inside the warehouse layout.
-* **Libraries Used:** `sqlalchemy` (`Column`, `String`, `Integer`, `Float`), `app.models.base` (`Base`).
-* **Classes:**
-  * `WarehouseNode`: Represents specific bins, receiving, and packing stations.
-  * `WarehousePath`: Represents connection links and distances between nodes.
-* **Code:**
-```python
-from sqlalchemy import Column, String, Integer, Float
-from app.models.base import Base
-
-class WarehouseNode(Base):
-    __tablename__ = "warehouse_nodes"
-
-    node_id   = Column(String, primary_key=True)
-    node_type = Column(String)
-    zone      = Column(String)
-    aisle     = Column(String)
-    rack      = Column(Integer)
-    shelf     = Column(Integer)
-    x         = Column(Float)
-    y         = Column(Float)
-
-
-class WarehousePath(Base):
-    __tablename__ = "warehouse_paths"
-
-    id        = Column(Integer, primary_key=True, autoincrement=True)
-    from_node = Column(String)
-    to_node   = Column(String)
-    distance  = Column(Float)
-```
-
----
-
-### File 8: `app/models/sku.py`
-* **Path:** `backend/app/models/sku.py`
-* **Purpose:** Database model containing master details for Stock Keeping Units (SKUs).
-* **Libraries Used:** `sqlalchemy` (`Column`, `String`, `Float`), `app.models.base` (`Base`).
-* **Classes:**
-  * `SKU`: Class mapping to `"sku_master"`. Contains dimension, weight, preferred storage, and zone details.
-* **Code:**
-```python
-from sqlalchemy import Column, String, Float
-from app.models.base import Base
-
-class SKU(Base):
-    __tablename__ = "sku_master"
-
-    sku_id         = Column(String, primary_key=True)
-    sku_name       = Column(String)
-    category       = Column(String)
-    sub_category   = Column(String)
-    weight_kg      = Column(Float)
-    length_cm      = Column(Float)
-    width_cm       = Column(Float)
-    height_cm      = Column(Float)
-    storage_type   = Column(String)
-    preferred_zone = Column(String)
-```
-
----
-
-### File 9: `app/models/inventory.py`
-* **Path:** `backend/app/models/inventory.py`
-* **Purpose:** Stores inventory levels for individual SKUs across physical warehouse node locations.
-* **Libraries Used:** `sqlalchemy` (`Column`, `String`, `Integer`), `app.models.base` (`Base`).
-* **Classes:**
-  * `Inventory`: Class mapping to `"inventory"` table. Tracks quantity per node location.
-* **Code:**
-```python
-from sqlalchemy import Column, String, Integer
-from app.models.base import Base
-
-class Inventory(Base):
-    __tablename__ = "inventory"
-
-    inventory_id = Column(String, primary_key=True)
-    sku_id       = Column(String)
-    node_id      = Column(String)
-    quantity     = Column(Integer)
-    last_updated = Column(String)
-```
-
----
-
-### File 10: `app/models/order.py`
-* **Path:** `backend/app/models/order.py`
-* **Purpose:** Models customer order metadata.
-* **Libraries Used:** `sqlalchemy` (`Column`, `String`), `app.models.base` (`Base`).
-* **Classes:**
-  * `Order`: Class mapping to `"orders"` table. Tracks order status, priority, and date.
-* **Code:**
-```python
-from sqlalchemy import Column, String
-from app.models.base import Base
-
-class Order(Base):
-    __tablename__ = "orders"
-
-    order_id    = Column(String, primary_key=True)
-    order_date  = Column(String)
-    customer_id = Column(String)
-    priority    = Column(String)
-    status      = Column(String)
-```
-
----
-
-### File 11: `app/models/order_item.py`
-* **Path:** `backend/app/models/order_item.py`
-* **Purpose:** Database model representing specific product quantities ordered inside each Order.
-* **Libraries Used:** `sqlalchemy` (`Column`, `String`, `Integer`), `app.models.base` (`Base`).
-* **Classes:**
-  * `OrderItem`: Class mapping to `"order_items"` table. Connects order IDs to SKU IDs and quantity.
-* **Code:**
-```python
-from sqlalchemy import Column, String, Integer
-from app.models.base import Base
-
-class OrderItem(Base):
-    __tablename__ = "order_items"
-
-    order_item_id = Column(String, primary_key=True)
-    order_id      = Column(String)
-    sku_id        = Column(String)
-    quantity      = Column(Integer)
-```
-
----
-
-### File 12: `app/db/import_csv.py`
-* **Path:** `backend/app/db/import_csv.py`
-* **Purpose:** Read raw CSV files from the datasets folder, clean leading/trailing whitespaces, and ingest them into PostgreSQL tables using pandas and the SQLAlchemy engine.
-* **Libraries Used:** `pandas`, `sys`, `os`, `app.core.database` (`engine`).
-* **Functions:**
-  * `import_csv(filepath, table_name)`: Loads single CSV datasets into target database tables in "append" mode.
-  * `run()`: Entrypoint function coordinating import order for all 6 core files.
-* **Code:**
-```python
-import pandas as pd
-import sys
-import os
-
-# This makes sure Python can find your app/ folder
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-
-from app.core.database import engine
-
-def import_csv(filepath, table_name):
-    """
-    Reads one CSV file and loads it into the matching PostgreSQL table.
-    if_exists='append' means add rows, don't delete existing ones.
-    index=False means don't write the pandas row numbers as a column.
-    """
-    df = pd.read_csv(filepath)
-
-    # Strip whitespace from string columns
-    # (your sku_master.csv had some whitespace in preferred_zone)
-    df = df.apply(lambda col: col.str.strip() if col.dtype == "object" else col)
-
-    df.to_sql(table_name, engine, if_exists="append", index=False)
-    print(f"✅ Imported {len(df)} rows into '{table_name}'")
-
-
-def run():
-    print("Starting CSV import...\n")
-
-    import_csv("datasets/warehouse_nodes.csv", "warehouse_nodes")
-    import_csv("datasets/warehouse_paths.csv", "warehouse_paths")
-    import_csv("datasets/sku_master.csv",      "sku_master")
-    import_csv("datasets/inventory.csv",        "inventory")
-    import_csv("datasets/orders.csv",           "orders")
-    import_csv("datasets/order_items.csv",      "order_items")
-
-    print("\n All CSVs imported successfully into PostgreSQL.")
-
-
-if __name__ == "__main__":
-    run()
-```
-
----
-
-### File 13: `app/agents/nl2sql.py`
-* **Path:** `backend/app/agents/nl2sql.py`
-* **Purpose:** Implements the natural language to SQL (NL2SQL) Agent. Converts users' plain English text questions into database queries, executes them using a restricted read-only SQL connection, and responds with a computed summary.
-* **Libraries Used:** `langchain_groq` (`ChatGroq`), `langchain_community.utilities` (`SQLDatabase`), `langchain_community.agent_toolkits` (`create_sql_agent`), `app.core.config` (`settings`).
-* **Functions:**
-  * `get_llm()`: Initialises the `ChatGroq` model (`llama-3.3-70b-versatile`) with a deterministic temperature of 0.
-  * `get_readonly_db()`: Sets up the SQLDatabase connection interface restricted to SELECT operations over 6 permitted tables.
-  * `run_nl2sql(question)`: Configures and invokes the LangChain SQL agent.
-* **Code:**
-```python
-# pyrefly: ignore [missing-import]
+# Import the Groq LLM wrapper from LangChain
 from langchain_groq import ChatGroq
-# pyrefly: ignore [missing-import]
+# Import the SQL Database connector utility
 from langchain_community.utilities import SQLDatabase
-# pyrefly: ignore [missing-import]
+# Import the function that creates the intelligent SQL agent
 from langchain_community.agent_toolkits import create_sql_agent
+# Import our configuration settings (like API keys and DB URLs)
 from app.core.config import settings
-
 
 def get_llm():
     """
     Creates and returns the Groq LLM instance.
-    
-    Model: llama-3.3-70b-versatile
-    - Free on Groq
-    - 70 billion parameter model — very good at SQL generation
-    - temperature=0 means deterministic answers, no hallucination
     """
     return ChatGroq(
+        # We use a 70B parameter model which is highly capable at writing SQL
         model="llama-3.3-70b-versatile",
+        # Pull the API key from our secure .env file
         api_key=settings.GROQ_API_KEY,
+        # Set temperature to 0 so the model is predictable and doesn't hallucinate
         temperature=0
     )
 
-
 def get_readonly_db():
     """
-    Connects to PostgreSQL using the READ-ONLY user.
-    This user can only SELECT — cannot INSERT, UPDATE, or DELETE.
-    Safe to expose to LLM-generated SQL queries.
+    Connects to PostgreSQL using a strictly READ-ONLY user account.
     """
     return SQLDatabase.from_uri(
+        # Connect using the restricted URL so the LLM cannot DROP or DELETE tables
         settings.READ_ONLY_DATABASE_URL,
+        # Explicitly list the tables the LLM is allowed to see and query
         include_tables=[
             "warehouse_nodes",
             "warehouse_paths",
@@ -419,236 +158,77 @@ def get_readonly_db():
         ]
     )
 
-
 def run_nl2sql(question: str) -> dict:
     """
-    Takes a plain English question about warehouse data.
-    Groq + LangChain converts it to SQL, runs it on PostgreSQL,
-    returns a clean answer.
-
-    Args:
-        question: plain English warehouse question from the user
-
-    Returns:
-        dict with 'question' and 'answer'
+    Takes a plain English question, converts it to SQL, runs it, and returns the answer.
     """
+    # 1. Get the LLM engine
     llm = get_llm()
+    # 2. Get the secure database connection
     db  = get_readonly_db()
 
+    # 3. Create the agent that glues the LLM and DB together
     agent = create_sql_agent(
         llm=llm,
         db=db,
-        verbose=True,              # shows SQL thinking in terminal
-        handle_parsing_errors=True
+        verbose=True,              # Prints the internal thought process and SQL to terminal
+        handle_parsing_errors=True # Tells the agent to auto-correct if it writes bad SQL syntax
     )
 
+    # 4. Feed the user's question into the agent
     result = agent.invoke({"input": question})
 
+    # 5. Return a clean dictionary containing the final output
     return {
         "question": question,
         "answer":   result["output"],
     }
 ```
 
----
+**5.3 Step-by-step execution trace**
+Input: "Which SKU has the highest order count?"
+1. **Question Translation**: The LangChain agent receives the question and asks the database for its schema (tables and columns).
+2. **SQL Generation**: The LLM analyzes the schema and writes: `SELECT sku_id, COUNT(*) as order_count FROM order_items GROUP BY sku_id ORDER BY order_count DESC LIMIT 1`
+3. **Execution**: The agent safely executes this SELECT query against the read-only PostgreSQL connection.
+4. **Result Retrieval**: The database returns `[("SKU01141", 244)]`.
+5. **Answer Formulation**: The agent feeds this raw data back into the LLM, instructing it to provide a human-friendly response.
+6. **Final Output**: The agent returns: "The SKU with the highest order count is SKU01141 with 244 orders."
 
-### File 14: `app/api/query.py`
-* **Path:** `backend/app/api/query.py`
-* **Purpose:** Exposes the API endpoint `/api/query` that triggers the NL2SQL agent.
-* **Libraries Used:** `fastapi` (`APIRouter`, `HTTPException`), `pydantic` (`BaseModel`), `app.agents.nl2sql` (`run_nl2sql`).
-* **Classes:**
-  * `QueryRequest`: Defines structural request format (question validation).
-  * `QueryResponse`: Defines structural output format (question and computed answer).
-* **Functions:**
-  * `query_warehouse(request)`: Route handler executing the agent call and checking for empty requests.
-* **Code:**
-```python
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from app.agents.nl2sql import run_nl2sql
+**5.4 Five Verified Examples**
 
+EXAMPLE 1:
+INPUT:  "Which SKU has the highest order count?"
+SQL:    SELECT sku_id, COUNT(*) as order_count FROM order_items 
+        GROUP BY sku_id ORDER BY order_count DESC LIMIT 1
+OUTPUT: "The SKU with the highest order count is SKU01141 
+        with a count of 244."
 
-router = APIRouter()
+EXAMPLE 2:
+INPUT:  "How many warehouse nodes in Fast zone?"
+SQL:    SELECT COUNT(*) FROM warehouse_nodes WHERE zone = 'Fast'
+OUTPUT: "There are 20 warehouse nodes in the Fast zone."
 
+EXAMPLE 3:
+INPUT:  "Top 3 SKU categories?"
+SQL:    SELECT category, COUNT(*) as count FROM sku_master GROUP BY category ORDER BY count DESC LIMIT 3
+OUTPUT: "The top 3 SKU categories are Groceries with 54, Electronics with 52, and Household with 38."
 
-# This defines exactly what the request body must look like
-class QueryRequest(BaseModel):
-    question: str
+EXAMPLE 4:
+INPUT:  "Average weight of Electronics SKUs?"
+SQL:    SELECT AVG(weight_kg) FROM sku_master WHERE category = 'Electronics'
+OUTPUT: "The average weight of Electronics SKUs is 1.44 kg."
 
+EXAMPLE 5:
+INPUT:  "How many unique orders with status Pending?"
+SQL:    SELECT COUNT(DISTINCT order_id) FROM orders WHERE status = 'Pending'
+OUTPUT: "There are 0 unique orders with a status of Pending."
 
-# This defines exactly what the response will look like
-class QueryResponse(BaseModel):
-    question: str
-    answer: str
+## SECTION 6 — RAG SOP AGENT (COMPLETE)
 
+**6.1 Purpose**
+This agent answers warehouse policy and procedure questions by searching through standard operating procedure (SOP) documents, ensuring responses are always based on official company guidelines rather than generic AI knowledge.
 
-@router.post("/query", response_model=QueryResponse)
-def query_warehouse(request: QueryRequest):
-    """
-    Accepts a plain English question about the warehouse.
-    Returns an AI-generated answer backed by real database data.
-    """
-
-    # Don't process empty questions
-    if not request.question.strip():
-        raise HTTPException(
-            status_code=400,
-            detail="Question cannot be empty"
-        )
-
-    result = run_nl2sql(request.question)
-    return result
-```
-
----
-
-### File 15: `app/main.py`
-* **Path:** `backend/app/main.py`
-* **Purpose:** Application root configuring FastAPI, global CORS middleware rules, API route routers, and health checks.
-* **Libraries Used:** `fastapi` (`FastAPI`), `fastapi.middleware.cors` (`CORSMiddleware`), `app.api` (`query`).
-* **Functions:**
-  * `health()`: Verifies backend liveness over `/health` route.
-* **Code:**
-```python
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from app.api import query                        # ← add this line
-
-app = FastAPI(
-    title="Warehouse AI Assistant",
-    description="AI-powered warehouse slotting and picking optimization",
-    version="1.0.0"
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(query.router, prefix="/api")  # ← add this line
-
-@app.get("/health")
-def health():
-    return {
-        "status": "running",
-        "message": "Warehouse AI is online"
-    }
-### File 15: `app/main.py`
-* **Path:** `backend/app/main.py`
-* **Purpose:** Application root configuring FastAPI, global CORS middleware rules, API route routers (query and sop), and health checks.
-* **Libraries Used:** `fastapi` (`FastAPI`), `fastapi.middleware.cors` (`CORSMiddleware`), `app.api` (`query`, `sop`).
-* **Functions:**
-  * `health()`: Verifies backend liveness over `/health` route.
-* **Code:**
-```python
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from app.api import query
-from app.api import sop
-
-app = FastAPI(
-    title="Warehouse AI Assistant",
-    description="AI-powered warehouse slotting and picking optimization",
-    version="1.0.0"
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(query.router, prefix="/api")
-app.include_router(sop.router, prefix="/api")
-
-@app.get("/health")
-def health():
-    return {
-        "status": "running",
-        "message": "Warehouse AI is online"
-    }
-```
-
----
-
-### File 16: `app/db/ingest_sops.py`
-* **Path:** `backend/app/db/ingest_sops.py`
-* **Purpose:** Reads standard operating procedure text files from the `docs/` folder, creates embeddings, and stores them in the persistent ChromaDB collection.
-* **Libraries Used:** `os`, `chromadb`.
-* **Functions:**
-  * `get_chroma_client(path)`: Initializes persistent storage client.
-  * `get_docs_path()`: Safely resolves the directory path of the documentation source.
-  * `ingest_documents()`: Scans all `.txt` documents, upserting their vector embeddings into ChromaDB.
-* **Code:**
-```python
-import os
-import chromadb
-
-def get_chroma_client(path: str = "./chroma_store") -> chromadb.PersistentClient:
-    """
-    Creates and returns a persistent ChromaDB client.
-    """
-    return chromadb.PersistentClient(path=path)
-
-def get_docs_path() -> str:
-    """
-    Locates the docs directory relative to the runtime environment.
-    """
-    if os.path.isdir("./docs"):
-        return "./docs"
-    elif os.path.isdir("../docs"):
-        return "../docs"
-    else:
-        raise FileNotFoundError("Could not locate the 'docs' directory at './docs' or '../docs'")
-
-def ingest_documents():
-    """
-    Reads all .txt files from the docs/ folder.
-    Converts each document to a vector embedding using ChromaDB.
-    """
-    client = get_chroma_client()
-    collection = client.get_or_create_collection(
-        name="warehouse_sops"
-    )
-    docs_path = get_docs_path()
-    count = 0
-
-    for filename in os.listdir(docs_path):
-        if not filename.endswith(".txt"):
-            continue
-
-        filepath = os.path.join(docs_path, filename)
-        with open(filepath, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        collection.upsert(
-            documents=[content],
-            ids=[filename]
-        )
-        count += 1
-        print(f"[OK] Ingested: {filename}")
-
-    print(f"\nTotal documents ingested: {count}")
-    print("ChromaDB store saved at: ./chroma_store")
-
-if __name__ == "__main__":
-    ingest_documents()
-```
-
----
-
-### File 17: `app/agents/rag.py`
-* **Path:** `backend/app/agents/rag.py`
-* **Purpose:** Implements RAG functionality. Connects to ChromaDB, runs semantic similarity queries, builds a restrictive context-based prompt, and generates answers using `llama-3.3-70b-versatile` on Groq.
-* **Libraries Used:** `chromadb`, `langchain_groq` (`ChatGroq`), `app.core.config` (`settings`).
-* **Functions:**
-  * `get_collection()`: Connects to the local persistent database and returns the SOPs collection.
-  * `get_llm()`: Resolves a ChatGroq LLM singleton with deterministic sampling temperature.
-  * `query_sop(question)`: Performs semantic search and generates responses mapping to source files.
-* **Code:**
+**6.2 Full code of rag.py with inline comments**
 ```python
 import chromadb
 from langchain_groq import ChatGroq
@@ -675,16 +255,21 @@ def query_sop(question: str) -> dict:
     """
     Performs semantic search against ChromaDB, then prompts Groq to answer.
     """
+    # 1. Connect to the ChromaDB collection
     collection = get_collection()
+    
+    # 2. Search for the top 3 most relevant document chunks
     results = collection.query(
         query_texts=[question],
         n_results=3
     )
 
+    # 3. Extract the text and source filenames from the results
     retrieved_docs = results["documents"][0]
     sources = results["ids"][0]
     context = "\n\n---\n\n".join(retrieved_docs)
 
+    # 4. Build a strict prompt forcing the LLM to use only the provided context
     prompt = f"""You are a warehouse operations assistant.
 Answer the question using ONLY the SOP context provided below.
 If the answer is not in the context, say "I could not find this in the warehouse SOPs."
@@ -697,9 +282,11 @@ QUESTION: {question}
 
 ANSWER:"""
 
+    # 5. Send the prompt to Groq and get the answer
     llm = get_llm()
     response = llm.invoke(prompt)
 
+    # 6. Return the answer along with the source files used
     return {
         "question": question,
         "answer":   response.content,
@@ -707,236 +294,150 @@ ANSWER:"""
     }
 ```
 
----
-
-### File 18: `app/api/sop.py`
-* **Path:** `backend/app/api/sop.py`
-* **Purpose:** Exposes API endpoint `/api/sop` to query ingested warehouse policies (Standard Operating Procedures).
-* **Libraries Used:** `fastapi` (`APIRouter`, `HTTPException`), `pydantic` (`BaseModel`), `app.agents.rag` (`query_sop`).
-* **Classes:**
-  * `SOPRequest`: Validates the string question payload.
-  * `SOPResponse`: Maps response keys (`question`, `answer`, `sources`).
-* **Functions:**
-  * `ask_sop(request)`: Triggers semantic lookup and prompts the RAG LLM pipeline.
-* **Code:**
+**6.3 Full code of ingest_sops.py with inline comments**
 ```python
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from app.agents.rag import query_sop
+import os
+import chromadb
 
-router = APIRouter()
-
-class SOPRequest(BaseModel):
-    question: str
-
-class SOPResponse(BaseModel):
-    question: str
-    answer:   str
-    sources:  list
-
-@router.post("/sop", response_model=SOPResponse)
-def ask_sop(request: SOPRequest):
+def get_chroma_client(path: str = "./chroma_store") -> chromadb.PersistentClient:
     """
-    FastAPI Route: POST /api/sop
-    Takes a plain text policy or SOP question.
+    Creates and returns a persistent ChromaDB client.
     """
-    if not request.question.strip():
-        raise HTTPException(
-            status_code=400,
-            detail="Question cannot be empty"
+    return chromadb.PersistentClient(path=path)
+
+def get_docs_path() -> str:
+    """
+    Locates the docs directory relative to the runtime environment.
+    """
+    if os.path.isdir("./docs"):
+        return "./docs"
+    elif os.path.isdir("../docs"):
+        return "../docs"
+    else:
+        raise FileNotFoundError("Could not locate the 'docs' directory at './docs' or '../docs'")
+
+def ingest_documents():
+    """
+    Reads all .txt files from the docs/ folder.
+    Converts each document to a vector embedding using ChromaDB.
+    """
+    # 1. Connect to ChromaDB and get/create the collection
+    client = get_chroma_client()
+    collection = client.get_or_create_collection(
+        name="warehouse_sops"
+    )
+    docs_path = get_docs_path()
+    count = 0
+
+    # 2. Iterate through all files in the docs folder
+    for filename in os.listdir(docs_path):
+        if not filename.endswith(".txt"):
+            continue
+
+        filepath = os.path.join(docs_path, filename)
+        # 3. Read the file content
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # 4. Insert or update the document in ChromaDB (upsert automatically embeds the text)
+        collection.upsert(
+            documents=[content],
+            ids=[filename]
         )
+        count += 1
+        print(f"[OK] Ingested: {filename}")
 
-    result = query_sop(request.question)
-    return result
+    print(f"\nTotal documents ingested: {count}")
+    print("ChromaDB store saved at: ./chroma_store")
+
+if __name__ == "__main__":
+    ingest_documents()
 ```
 
----
+**6.4 Step-by-step execution trace**
+Input: "How should heavy items above 15kg be stored?"
+1. **Question**: User sends "How should heavy items above 15kg be stored?" to the `/api/sop` endpoint.
+2. **ChromaDB Search**: The question is embedded and compared against the vector database.
+3. **Context Retrieved**: ChromaDB finds the relevant section in `slotting_policy.txt` regarding weight limits.
+4. **Prompt Built**: A prompt is constructed containing the question and the retrieved policy text.
+5. **Groq Answers**: The LLM reads the policy and formulates a concise answer based strictly on that text.
+6. **Output Returned**: The final answer is returned to the user, complete with the source filename (`slotting_policy.txt`).
 
-### File 19: `.gitignore`
-* **Path:** `.gitignore` (Root level)
-* **Purpose:** Keeps system environments, sensitive credentials, and database caches out of version control.
-* **Code:**
-```gitignore
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+**6.5 Five verified input/output examples using real test data**
 
-# C extensions
-*.so
+EXAMPLE 1:
+INPUT:   "Heavy items above 15kg"
+OUTPUT:  "Heavy items above 15kg must be stored at ground level only."
+SOURCES: [slotting_policy.txt, safety_guidelines.txt]
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+EXAMPLE 2:
+INPUT:   "Procedure for damaged goods"
+OUTPUT:  "Damaged goods must be moved to Zone D within 2 hours."
+SOURCES: [receiving_sop.txt, slotting_policy.txt]
 
-# Vector database storage
-chroma_store/
-chroma.sqlite3
-backend/chroma_store/
-backend/venv/
-backend/.env
+EXAMPLE 3:
+INPUT:   "Chemicals near food"
+OUTPUT:  "No, chemicals must never be stored together with food items."
+SOURCES: [slotting_policy.txt, safety_guidelines.txt]
 
-# IDEs
-.vscode/
-.idea/
+EXAMPLE 4:
+INPUT:   "High velocity SKUs"
+OUTPUT:  "High velocity SKUs should be stored in Zone A near the packing station."
+SOURCES: [slotting_policy.txt, packing_sop.txt]
 
-# OS metadata
-.DS_Store
-Thumbs.db
-```
+EXAMPLE 5:
+INPUT:   "When to schedule re-slotting"
+OUTPUT:  "Re-slotting should be scheduled during the Night shift."
+SOURCES: [slotting_policy.txt]
 
----
+**6.6 Side-by-side comparison**
+- **WITHOUT RAG**: Groq answers from general training data (e.g., "Generally, heavy items should be placed on lower shelves to avoid injury..."). It is a generic guess.
+- **WITH RAG**: Groq reads `slotting_policy.txt` and answers exactly according to company rules (e.g., "Heavy items above 15kg must be stored at ground level only.").
 
-## 3. Data Flow & Agent Execution Traces
+## SECTION 7 — DATA FLOW SUMMARY
 
-### Global Data Flow Pipeline
-1. **Relational Data Path:** Raw CSV datasets (`datasets/`) $\rightarrow$ Ingested via `import_csv.py` $\rightarrow$ Stored in PostgreSQL $\rightarrow$ Queried by the NL2SQL Agent via read-only SQLAlchemy connections.
-2. **Unstructured Data Path:** Policy documents (`docs/`) $\rightarrow$ Chunks embedded and saved via `ingest_sops.py` $\rightarrow$ ChromaDB storage $\rightarrow$ Queried by the RAG Agent using semantic similarity.
-3. **Execution Delivery:** User requests hit FastAPI controllers (`/api/query`, `/api/sop`) $\rightarrow$ Agents run processes via Groq `llama-3.3-70b-versatile` $\rightarrow$ Clean JSON responses are delivered back to client.
+**NL2SQL Flow (9 steps from question to answer):**
+1. Manager types question in the frontend or API.
+2. Question is sent to FastAPI `/api/query` route.
+3. Pydantic validates the request format.
+4. `run_nl2sql` is called with the question.
+5. LangChain agent retrieves database schema.
+6. Agent uses Groq LLM to write a SQL query based on the schema and question.
+7. Agent executes the SQL query against the read-only PostgreSQL connection.
+8. Database returns raw data (e.g., numbers or lists).
+9. Agent formulates a natural language answer and returns it via FastAPI.
 
-### In-Depth Execution Traces
+**RAG Flow (8 steps from question to answer):**
+1. Picker/Manager types question in the frontend or API.
+2. Question is sent to FastAPI `/api/sop` route.
+3. Pydantic validates the request format.
+4. `query_sop` function connects to ChromaDB.
+5. ChromaDB performs a semantic search to find top matching document chunks.
+6. A strict prompt is built using the retrieved text as context.
+7. Groq LLM generates an answer using ONLY the provided context.
+8. The answer and source files are returned via FastAPI.
 
-#### Trace A: NL2SQL Agent Chain
-When a user asks: *"Which SKU has the highest order count, and what is its order count?"*
-1. **Schema Check:** The agent retrieves schemas for `order_items` and `sku_master`.
-2. **Query Formulation:**
-   ```sql
-   SELECT sku_id, COUNT(*) as order_count 
-   FROM order_items 
-   GROUP BY sku_id 
-   ORDER BY order_count DESC 
-   LIMIT 1;
-   ```
-3. **Execution:** Database executes the query and returns `[('SKU01141', 244)]`.
-4. **Summary:** Agent returns: *"The SKU with the highest order count is SKU01141, and its order count is 244."*
+## SECTION 8 — CURRENT STATUS TABLE
 
-#### Trace B: RAG Agent Chain
-When a user asks: *"How should heavy items above 15kg be stored according to policy?"*
-1. **Semantic Search:** ChromaDB returns chunk from `slotting_policy.txt`: *"Rule 5: Heavy items above 15kg must be stored at ground level only."*
-2. **Context Assembly:** Prompts LLM using strictly this context.
-3. **Summary:** Agent returns: *"Heavy items above 15kg must be stored at ground level only."*
+| Component       | Status      | File               | Notes         |
+|-----------------|-------------|--------------------|---------------|
+| PostgreSQL DB   | Complete    | models/, db/       | 7 tables      |
+| NL2SQL Agent    | Complete    | agents/nl2sql.py   | Tested ✅     |
+| RAG SOP Agent   | Complete    | agents/rag.py      | Tested ✅     |
+| Slotting Agent  | In Progress | agents/slotting.py | Building next |
+| Pick Path Agent | Planned     | agents/pick_path.py| After slot    |
+| LangGraph Router| Planned     | agents/router.py   | After agents  |
+| JWT Auth        | Planned     | core/security.py   | After router  |
+| React Frontend  | Planned     | frontend/          | Last          |
 
----
+## SECTION 9 — HOW TO RUN THE PROJECT
 
-## 4. Test Cases JSON Database
-
-Below is the verified test cases JSON data saved at `agent_test_cases.json` for validation and documentation sharing:
-
-```json
-[
-    {
-        "id": "NL2SQL_001",
-        "agent_type": "NL2SQL",
-        "question": "Which SKU has the highest order count, and what is its order count?",
-        "answer": "The SKU with the highest order count is SKU01141, and its order count is 244.",
-        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
-    },
-    {
-        "id": "NL2SQL_002",
-        "agent_type": "NL2SQL",
-        "question": "How many warehouse nodes are located in the Fast zone?",
-        "answer": "20",
-        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
-    },
-    {
-        "id": "NL2SQL_003",
-        "agent_type": "NL2SQL",
-        "question": "List the top 3 categories of SKUs based on the number of SKUs.",
-        "answer": "The top 3 categories of SKUs based on the number of SKUs are Groceries with 54 SKUs, Electronics with 52 SKUs, and Household with 38 SKUs.",
-        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
-    },
-    {
-        "id": "NL2SQL_004",
-        "agent_type": "NL2SQL",
-        "question": "What is the average weight in kg of SKUs in the category Electronics?",
-        "answer": "The average weight of SKUs in the category Electronics is 1.44 kg.",
-        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
-    },
-    {
-        "id": "NL2SQL_005",
-        "agent_type": "NL2SQL",
-        "question": "How many unique orders have a status of Pending?",
-        "answer": "0",
-        "sources_or_query": "PostgreSQL database query (run_nl2sql)"
-    },
-    {
-        "id": "RAG_001",
-        "agent_type": "RAG",
-        "question": "How should heavy items above 15kg be stored according to policy?",
-        "answer": "Heavy items above 15kg must be stored at ground level only.",
-        "sources_or_query": [
-            "slotting_policy.txt",
-            "packing_sop.txt",
-            "safety_guidelines.txt"
-        ]
-    },
-    {
-        "id": "RAG_002",
-        "agent_type": "RAG",
-        "question": "What is the storage policy for fragile items in the warehouse?",
-        "answer": "Fragile items must be stored on lower shelves below 1.5 meters height.",
-        "sources_or_query": [
-            "slotting_policy.txt",
-            "packing_sop.txt",
-            "receiving_sop.txt"
-        ]
-    },
-    {
-        "id": "RAG_003",
-        "agent_type": "RAG",
-        "question": "Can cold storage items be moved to ambient temperature zones?",
-        "answer": "No, cold storage items must never be moved to ambient temperature zones.",
-        "sources_or_query": [
-            "slotting_policy.txt",
-            "receiving_sop.txt",
-            "packing_sop.txt"
-        ]
-    },
-    {
-        "id": "RAG_004",
-        "agent_type": "RAG",
-        "question": "When should re-slotting be scheduled to avoid disruption?",
-        "answer": "Re-slotting should be scheduled during Night shift to avoid disruption.",
-        "sources_or_query": [
-            "slotting_policy.txt",
-            "receiving_sop.txt",
-            "packing_sop.txt"
-        ]
-    },
-    {
-        "id": "RAG_005",
-        "agent_type": "RAG",
-        "question": "Is manager approval required before re-slotting is permitted?",
-        "answer": "Yes, manager digital approval in the system is required before re-slotting is permitted, as stated in point 6 of the SLOTTING POLICY.",
-        "sources_or_query": [
-            "slotting_policy.txt",
-            "receiving_sop.txt",
-            "packing_sop.txt"
-        ]
-    }
-]
-```
-
----
-
-## 5. Project Status Report
-
-### Current Progress & Configuration Status:
-1. **Database & Vector Storage Ingestion:**
-   * SQLite metadata indices and standard tabular data completely synced from CSV sources using SQLAlchemy.
-   * ChromaDB persistence client configured and successfully indexed with all SOP documents.
-2. **Environment & Core Config:**
-   * Global configuration system loads Groq API key and connection strings securely from local `.env`.
-   * Outdated configurations (e.g., Gemini integration leftovers) completely stripped out.
-3. **Deployed Capabilities (Verifications OK):**
-   * **NL2SQL Agent:** Fully operational. Automatically reads database schemas, compiles queries, executes securely, and returns natural answers.
-   * **RAG Agent:** Fully operational. Performs semantic vector query on ChromaDB and creates context-constrained answers based on SOPs.
-   * **FastAPI Server:** Online and exposing `/api/query` and `/api/sop` endpoints.
-4. **Current Status:**
-   * **Stable & Verified**. Ready for Slotting Optimization Agent implementation.
-
+1. `cd D:\warehouse-ai\backend`
+2. `.\venv\Scripts\activate`
+3. `pip install -r requirements.txt`
+4. (PostgreSQL setup - already done)
+5. `python -m app.db.import_csv`
+6. `python -m app.db.ingest_sops`
+7. `uvicorn app.main:app --reload`
+8. Open `http://localhost:8000/docs`
+9. Test `/api/query` and `/api/sop`
