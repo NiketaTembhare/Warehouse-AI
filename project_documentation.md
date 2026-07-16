@@ -424,13 +424,18 @@ SOURCES: [slotting_policy.txt]
 | PostgreSQL DB   | Complete    | models/, db/       | 7 tables      |
 | NL2SQL Agent    | Complete    | agents/nl2sql.py   | Tested ✅     |
 | RAG SOP Agent   | Complete    | agents/rag.py      | Tested ✅     |
-| Slotting Agent  | In Progress | agents/slotting.py | Building next |
+| Slotting Agent  | Complete    | agents/slotting.py | Tested ✅     |
 | Pick Path Agent | Planned     | agents/pick_path.py| After slot    |
 | LangGraph Router| Planned     | agents/router.py   | After agents  |
 | JWT Auth        | Planned     | core/security.py   | After router  |
 | React Frontend  | Planned     | frontend/          | Last          |
 
-## SECTION 9 — HOW TO RUN THE PROJECT
+## SECTION 9 — AGENT 3: SLOTTING AGENT (COMPLETE)
+
+**9.1 Purpose**
+This agent analyzes warehouse SKUs based on their order velocity (frequency) and determines the optimal zone for each SKU (Fast, Medium, Slow). It identifies SKUs that are in suboptimal zones and generates actionable move recommendations for warehouse managers to improve picking efficiency.
+
+## SECTION 10 — HOW TO RUN THE PROJECT
 
 1. `cd D:\warehouse-ai\backend`
 2. `.\venv\Scripts\activate`

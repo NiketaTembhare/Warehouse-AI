@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import query
 from app.api import sop
+from app.api import slotting
 
 app = FastAPI(
     title="Warehouse AI Assistant",
@@ -18,6 +19,7 @@ app.add_middleware(
 
 app.include_router(query.router, prefix="/api")
 app.include_router(sop.router, prefix="/api")
+app.include_router(slotting.router, prefix="/api")
 
 @app.get("/health")
 def health():
