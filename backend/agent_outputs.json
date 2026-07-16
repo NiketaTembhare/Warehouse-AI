@@ -1,0 +1,289 @@
+{
+  "project": "Warehouse AI Assistant",
+  "generated_on": "2026-07-16 08:55",
+  "total_test_cases": 15,
+  "agents_tested": [
+    "NL2SQL Agent",
+    "RAG SOP Agent",
+    "Slotting Optimization Agent"
+  ],
+  "test_cases": [
+    {
+      "id": "TC_01",
+      "agent": "NL2SQL Agent",
+      "endpoint": "POST /api/query",
+      "input": {
+        "question": "How many total orders are in the database?"
+      },
+      "output": {
+        "question": "How many total orders are in the database?",
+        "answer": "There are 5000 total orders in the database."
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_02",
+      "agent": "NL2SQL Agent",
+      "endpoint": "POST /api/query",
+      "input": {
+        "question": "Which 5 SKUs appear most frequently in order_items?"
+      },
+      "output": {
+        "question": "Which 5 SKUs appear most frequently in order_items?",
+        "answer": "The 5 SKUs that appear most frequently in order_items are SKU01141, SKU01152, SKU01146, SKU01142, and SKU01136, with counts of 244, 237, 229, 226, and 226 respectively."
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_03",
+      "agent": "NL2SQL Agent",
+      "endpoint": "POST /api/query",
+      "input": {
+        "question": "How many warehouse nodes are in the Fast zone?"
+      },
+      "output": {
+        "question": "How many warehouse nodes are in the Fast zone?",
+        "answer": "There are 20 warehouse nodes in the Fast zone."
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_04",
+      "agent": "NL2SQL Agent",
+      "endpoint": "POST /api/query",
+      "input": {
+        "question": "What are the top 3 SKU categories by number of SKUs?"
+      },
+      "output": {
+        "question": "What are the top 3 SKU categories by number of SKUs?",
+        "answer": "The top 3 SKU categories by number of SKUs are Groceries with 54 SKUs, Electronics with 52 SKUs, and Household with 38 SKUs."
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_05",
+      "agent": "NL2SQL Agent",
+      "endpoint": "POST /api/query",
+      "input": {
+        "question": "What is the average weight in kg of Electronics SKUs?"
+      },
+      "output": {
+        "question": "What is the average weight in kg of Electronics SKUs?",
+        "answer": "1.44"
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_06",
+      "agent": "NL2SQL Agent",
+      "endpoint": "POST /api/query",
+      "input": {
+        "question": "How many unique orders have status Completed?"
+      },
+      "output": {
+        "question": "How many unique orders have status Completed?",
+        "answer": "There are 4641 unique orders with a status of Completed."
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_07",
+      "agent": "NL2SQL Agent",
+      "endpoint": "POST /api/query",
+      "input": {
+        "question": "Which SKU has the lowest order count?"
+      },
+      "output": {
+        "question": "Which SKU has the lowest order count?",
+        "answer": "The SKU with the lowest order count is SKU01179 and SKU01187, both with 3 orders."
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_08",
+      "agent": "NL2SQL Agent",
+      "endpoint": "POST /api/query",
+      "input": {
+        "question": "How many total SKUs are in the sku_master table?"
+      },
+      "output": {
+        "question": "How many total SKUs are in the sku_master table?",
+        "answer": "There are 200 total SKUs in the sku_master table."
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_09",
+      "agent": "RAG SOP Agent",
+      "endpoint": "POST /api/sop",
+      "input": {
+        "question": "What is the procedure for damaged goods?"
+      },
+      "output": {
+        "question": "What is the procedure for damaged goods?",
+        "answer": "Damaged items during receiving must be photographed and tagged immediately, then moved to Zone D (damaged holding area) within 2 hours. A damage report with supplier name, item details, and damage description must be created. If the damaged shipment is above 10 units, the warehouse manager must be notified immediately.",
+        "sources": [
+          "receiving_sop.txt",
+          "packing_sop.txt",
+          "safety_guidelines.txt"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_10",
+      "agent": "RAG SOP Agent",
+      "endpoint": "POST /api/sop",
+      "input": {
+        "question": "Can chemicals be stored near food items?"
+      },
+      "output": {
+        "question": "Can chemicals be stored near food items?",
+        "answer": "No, chemical products must never be stored near food or pharmaceutical items.",
+        "sources": [
+          "slotting_policy.txt",
+          "safety_guidelines.txt",
+          "packing_sop.txt"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_11",
+      "agent": "RAG SOP Agent",
+      "endpoint": "POST /api/sop",
+      "input": {
+        "question": "Where should high velocity SKUs be stored?"
+      },
+      "output": {
+        "question": "Where should high velocity SKUs be stored?",
+        "answer": "High velocity SKUs (Class A) must always be stored in Zone A near the packing station.",
+        "sources": [
+          "slotting_policy.txt",
+          "packing_sop.txt",
+          "safety_guidelines.txt"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_12",
+      "agent": "RAG SOP Agent",
+      "endpoint": "POST /api/sop",
+      "input": {
+        "question": "How should heavy items above 15kg be stored?"
+      },
+      "output": {
+        "question": "How should heavy items above 15kg be stored?",
+        "answer": "Heavy items above 15kg must be stored at ground level only.",
+        "sources": [
+          "slotting_policy.txt",
+          "packing_sop.txt",
+          "safety_guidelines.txt"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_13",
+      "agent": "RAG SOP Agent",
+      "endpoint": "POST /api/sop",
+      "input": {
+        "question": "When should re-slotting be scheduled to avoid disruption?"
+      },
+      "output": {
+        "question": "When should re-slotting be scheduled to avoid disruption?",
+        "answer": "Re-slotting should be scheduled during Night shift to avoid disruption.",
+        "sources": [
+          "slotting_policy.txt",
+          "receiving_sop.txt",
+          "packing_sop.txt"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_14",
+      "agent": "RAG SOP Agent",
+      "endpoint": "POST /api/sop",
+      "input": {
+        "question": "What is the maximum box weight limit for packing?"
+      },
+      "output": {
+        "question": "What is the maximum box weight limit for packing?",
+        "answer": "The maximum box weight limit is 25kg. Split into two boxes if exceeded.",
+        "sources": [
+          "packing_sop.txt",
+          "safety_guidelines.txt",
+          "slotting_policy.txt"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "TC_15",
+      "agent": "Slotting Optimization Agent",
+      "endpoint": "POST /api/slotting",
+      "input": "No input required — analyzes all SKUs automatically",
+      "output": {
+        "total_skus_analyzed": 200,
+        "total_mismatches": 146,
+        "summary": "Based on the analysis, it is recommended that SKUs 01178, 01181, 01082, 01182, and 01046 be relocated from the Fast zone to the Medium zone. These Class B SKUs have a high order volume, with each receiving 150-153 orders, making them a priority for adjustment. By moving these SKUs to the Medium zone, the warehouse can optimize its layout to better match the demand for these items. This relocation will help improve overall warehouse efficiency by placing these SKUs in a more suitable location based on their order frequency.",
+        "recommendations": [
+          {
+            "sku_id": "SKU01178",
+            "order_count": 153,
+            "abc_class": "B",
+            "current_node": "B10",
+            "current_zone": "Fast",
+            "target_zone": "Medium",
+            "action": "Move from Fast zone to Medium zone"
+          },
+          {
+            "sku_id": "SKU01181",
+            "order_count": 152,
+            "abc_class": "B",
+            "current_node": "A06",
+            "current_zone": "Fast",
+            "target_zone": "Medium",
+            "action": "Move from Fast zone to Medium zone"
+          },
+          {
+            "sku_id": "SKU01082",
+            "order_count": 150,
+            "abc_class": "B",
+            "current_node": "A04",
+            "current_zone": "Fast",
+            "target_zone": "Medium",
+            "action": "Move from Fast zone to Medium zone"
+          },
+          {
+            "sku_id": "SKU01182",
+            "order_count": 150,
+            "abc_class": "B",
+            "current_node": "A10",
+            "current_zone": "Fast",
+            "target_zone": "Medium",
+            "action": "Move from Fast zone to Medium zone"
+          },
+          {
+            "sku_id": "SKU01046",
+            "order_count": 150,
+            "abc_class": "B",
+            "current_node": "B03",
+            "current_zone": "Fast",
+            "target_zone": "Medium",
+            "action": "Move from Fast zone to Medium zone"
+          }
+        ],
+        "abc_breakdown": {
+          "class_a_count": 40,
+          "class_b_count": 60,
+          "class_c_count": 100
+        },
+        "note": "Showing top 5 of 20 recommendations"
+      },
+      "status": "PASS"
+    }
+  ]
+}
