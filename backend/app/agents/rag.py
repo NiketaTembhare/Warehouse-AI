@@ -1,3 +1,5 @@
+import time
+import mlflow
 import chromadb
 from langchain_groq import ChatGroq
 from app.core.config import settings
@@ -35,55 +37,63 @@ def get_llm() -> ChatGroq:
 
 
 def query_sop(question: str) -> dict:
-    """
-    Performs semantic search against ChromaDB to retrieve relevant context chunks,
-    then prompts Groq to construct a highly focused answer using only that context.
+    mlflow.set_experiment('warehouse_agents')
+    with mlflow.start_run():
+        start_time = time.time()
+        mlflow.set_tag('agent', 'rag')
+        mlflow.log_param('query', question)
+
+        """
+        Performs semantic search against ChromaDB to retrieve relevant context chunks,
+        then prompts Groq to construct a highly focused answer using only that context.
     
-    Args:
-        question: The user's query regarding warehouse standard operating procedures.
+        Args:
+            question: The user's query regarding warehouse standard operating procedures.
         
-    Returns:
-        dict: A dictionary containing:
-            - "question": Original user question
-            - "answer": LLM generated response based strictly on the retrieved context
-            - "sources": List of document filenames that matched the query
-    """
-    # Step 1: Connect to ChromaDB collection
-    collection = get_collection()
+        Returns:
+            dict: A dictionary containing:
+                - "question": Original user question
+                - "answer": LLM generated response based strictly on the retrieved context
+                - "sources": List of document filenames that matched the query
+        """
+        # Step 1: Connect to ChromaDB collection
+        collection = get_collection()
 
-    # Query ChromaDB for top 3 documents matching the question semantically
-    results = collection.query(
-        query_texts=[question],
-        n_results=3
-    )
+        # Query ChromaDB for top 3 documents matching the question semantically
+        results = collection.query(
+            query_texts=[question],
+            n_results=3
+        )
 
-    # Extract matching texts and filenames (lists are nested inside Chroma output format)
-    retrieved_docs = results["documents"][0]
-    sources = results["ids"][0]
+        # Extract matching texts and filenames (lists are nested inside Chroma output format)
+        retrieved_docs = results["documents"][0]
+        sources = results["ids"][0]
 
-    # Combine the top matching text chunks with clear delimiter lines
-    context = "\n\n---\n\n".join(retrieved_docs)
+        # Combine the top matching text chunks with clear delimiter lines
+        context = "\n\n---\n\n".join(retrieved_docs)
 
-    # Step 2: Build a precise RAG system prompt restricting hallucination
-    prompt = f"""You are a warehouse operations assistant.
-Answer the question using ONLY the SOP context provided below.
-If the answer is not in the context, say "I could not find this in the warehouse SOPs."
-Do not make up any information.
+        # Step 2: Build a precise RAG system prompt restricting hallucination
+        prompt = f"""You are a warehouse operations assistant.
+    Answer the question using ONLY the SOP context provided below.
+    If the answer is not in the context, say "I could not find this in the warehouse SOPs."
+    Do not make up any information.
 
-SOP CONTEXT:
-{context}
+    SOP CONTEXT:
+    {context}
 
-QUESTION: {question}
+    QUESTION: {question}
 
-ANSWER:"""
+    ANSWER:"""
 
-    # Step 3: Instantiate ChatGroq LLM and generate the response
-    llm = get_llm()
-    response = llm.invoke(prompt)
+        # Step 3: Instantiate ChatGroq LLM and generate the response
+        llm = get_llm()
+        response = llm.invoke(prompt)
 
-    # Step 4: Return formatted results including source files
-    return {
-        "question": question,
-        "answer":   response.content,
-        "sources":  sources
-    }
+        # Step 4: Return formatted results including source files
+        elapsed = time.time() - start_time
+        mlflow.log_metric('response_time', elapsed)
+        return {
+            "question": question,
+            "answer":   response.content,
+            "sources":  sources
+        }

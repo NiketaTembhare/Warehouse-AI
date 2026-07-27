@@ -1,3 +1,5 @@
+import time
+import mlflow
 from sqlalchemy import text
 from langchain_groq import ChatGroq
 from app.core.config import settings
@@ -223,44 +225,52 @@ Write the manager summary:"""
 
 
 def run_slotting() -> dict:
-    """
-    Main function — runs the complete slotting optimization pipeline.
+    mlflow.set_experiment('warehouse_agents')
+    with mlflow.start_run():
+        start_time = time.time()
+        mlflow.set_tag('agent', 'slotting')
+        mlflow.log_param('query', 'N/A')
+
+        """
+        Main function — runs the complete slotting optimization pipeline.
     
-    Flow:
-    1. Get velocity data (order counts per SKU) from order_items
-    2. Classify each SKU into A/B/C based on velocity
-    3. Get current physical location of each SKU
-    4. Find mismatches between current zone and target zone
-    5. Generate human-readable summary using Groq
+        Flow:
+        1. Get velocity data (order counts per SKU) from order_items
+        2. Classify each SKU into A/B/C based on velocity
+        3. Get current physical location of each SKU
+        4. Find mismatches between current zone and target zone
+        5. Generate human-readable summary using Groq
     
-    Returns:
-        dict with full slotting analysis results
-    """
-    # Step 1: Get how often each SKU is ordered
-    velocity_data = get_velocity_data()
-    total_skus = len(velocity_data)
+        Returns:
+            dict with full slotting analysis results
+        """
+        # Step 1: Get how often each SKU is ordered
+        velocity_data = get_velocity_data()
+        total_skus = len(velocity_data)
     
-    # Step 2: Classify into A (fast), B (medium), C (slow)
-    velocity_data = classify_abc(velocity_data)
+        # Step 2: Classify into A (fast), B (medium), C (slow)
+        velocity_data = classify_abc(velocity_data)
     
-    # Step 3: Get current physical zone of each SKU
-    locations = get_current_locations()
+        # Step 3: Get current physical zone of each SKU
+        locations = get_current_locations()
     
-    # Step 4: Find SKUs in wrong zones
-    mismatches = find_mismatches(velocity_data, locations)
+        # Step 4: Find SKUs in wrong zones
+        mismatches = find_mismatches(velocity_data, locations)
     
-    # Step 5: Generate readable summary using Groq
-    summary = generate_summary(mismatches, total_skus)
+        # Step 5: Generate readable summary using Groq
+        summary = generate_summary(mismatches, total_skus)
     
-    # Return complete results
-    return {
-        "total_skus_analyzed":   total_skus,
-        "total_mismatches":      len(mismatches),
-        "summary":               summary,
-        "recommendations":       mismatches[:20],  # top 20 priority moves
-        "abc_breakdown": {
-            "class_a_count": sum(1 for s in velocity_data if s["abc_class"] == "A"),
-            "class_b_count": sum(1 for s in velocity_data if s["abc_class"] == "B"),
-            "class_c_count": sum(1 for s in velocity_data if s["abc_class"] == "C")
+        # Return complete results
+        elapsed = time.time() - start_time
+        mlflow.log_metric('response_time', elapsed)
+        return {
+            "total_skus_analyzed":   total_skus,
+            "total_mismatches":      len(mismatches),
+            "summary":               summary,
+            "recommendations":       mismatches[:20],  # top 20 priority moves
+            "abc_breakdown": {
+                "class_a_count": sum(1 for s in velocity_data if s["abc_class"] == "A"),
+                "class_b_count": sum(1 for s in velocity_data if s["abc_class"] == "B"),
+                "class_c_count": sum(1 for s in velocity_data if s["abc_class"] == "C")
+            }
         }
-    }

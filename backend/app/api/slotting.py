@@ -37,10 +37,10 @@ class SlottingResponse(BaseModel):
     abc_breakdown:       ABCBreakdown
 
 
-@router.post("/slotting", response_model=SlottingResponse)
+@router.get("/slotting", response_model=SlottingResponse)
 def optimize_slotting():
     """
-    POST /api/slotting
+    GET /api/slotting
     
     Runs the full slotting optimization analysis.
     No request body needed — analyzes all SKUs automatically.

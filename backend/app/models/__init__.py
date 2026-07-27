@@ -1,5 +1,4 @@
 from app.models.base import Base
-from app.models.user import User
 from app.models.warehouse import WarehouseNode, WarehousePath
 from app.models.sku import SKU
 from app.models.inventory import Inventory

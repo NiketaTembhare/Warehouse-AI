@@ -14,6 +14,8 @@ chromadb
 networkx
 ortools
 langchain-groq
+langgraph
+mlflow
 
 # Step 1: uvicorn app.main:app --reload
 # Step 2: Open localhost:8000/docs

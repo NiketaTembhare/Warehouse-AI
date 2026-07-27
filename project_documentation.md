@@ -14,6 +14,19 @@ warehouse-ai/
 │   ├── receiving_sop.txt         # Text file containing rules for receiving goods
 │   ├── safety_guidelines.txt     # Text file containing warehouse safety protocols
 │   └── slotting_policy.txt       # Text file containing warehouse slotting policies
+├── frontend/
+│   ├── index.html                # Vite HTML entry point
+│   ├── package.json              # Frontend dependencies and scripts
+│   ├── postcss.config.js         # PostCSS configuration for Tailwind CSS v3
+│   ├── tailwind.config.js        # Tailwind CSS styling configuration
+│   ├── vite.config.js            # Vite bundler configuration
+│   └── src/
+│       ├── main.jsx              # React application root entry point
+│       ├── index.css             # Global CSS with Tailwind directives
+│       ├── App.jsx               # Main React router component
+│       ├── api/                  # Axios API client functions
+│       ├── components/           # Reusable UI components (Layout, etc.)
+│       └── pages/                # Page views (Dashboard, Chat, Slotting, PickPath)
 └── backend/
     ├── .env                      # Stores all secrets and API keys (Database URL, Groq API Key)
     ├── requirements.txt          # All Python packages needed to run the backend
@@ -428,7 +441,7 @@ SOURCES: [slotting_policy.txt]
 | Pick Path Agent | Planned     | agents/pick_path.py| After slot    |
 | LangGraph Router| Planned     | agents/router.py   | After agents  |
 | JWT Auth        | Planned     | core/security.py   | After router  |
-| React Frontend  | Planned     | frontend/          | Last          |
+| React Frontend  | Complete    | frontend/          | Vite + Tailwind v3 ✅ |
 
 ## SECTION 9 — AGENT 3: SLOTTING AGENT (COMPLETE)
 
@@ -437,6 +450,7 @@ This agent analyzes warehouse SKUs based on their order velocity (frequency) and
 
 ## SECTION 10 — HOW TO RUN THE PROJECT
 
+### Backend Setup:
 1. `cd D:\warehouse-ai\backend`
 2. `.\venv\Scripts\activate`
 3. `pip install -r requirements.txt`
@@ -446,3 +460,10 @@ This agent analyzes warehouse SKUs based on their order velocity (frequency) and
 7. `uvicorn app.main:app --reload`
 8. Open `http://localhost:8000/docs`
 9. Test `/api/query` and `/api/sop`
+
+### Frontend Setup:
+1. `cd D:\warehouse-ai\frontend`
+2. `npm install`
+3. `npm run dev`
+4. Open `http://localhost:5173`
+
