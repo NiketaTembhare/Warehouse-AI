@@ -25,7 +25,7 @@ def classify_intent_node(state: AgentState):
     # Initialize LLM with structured output
     llm = ChatGroq(
         temperature=0, 
-        model_name="llama3-70b-8192", 
+        model_name="llama-3.1-8b-instant", 
         api_key=settings.GROQ_API_KEY
     )
     structured_llm = llm.with_structured_output(IntentClassification)

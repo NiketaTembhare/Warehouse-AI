@@ -1,3 +1,49 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --bg-primary:    #0f1117;
+  --bg-surface:    #1a1d27;
+  --bg-card:       #1e2130;
+  --bg-card-hover: #252838;
+  --border:        #2a2d3a;
+  --accent:        #6366f1;
+  --accent-hover:  #4f46e5;
+  --success:       #10b981;
+  --warning:       #f59e0b;
+  --error:         #ef4444;
+  --text-primary:  #f1f5f9;
+  --text-secondary:#94a3b8;
+  --text-muted:    #475569;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Override any Tailwind white backgrounds */
+.bg-white { background: var(--bg-card) !important; }
+.bg-gray-50 { background: var(--bg-primary) !important; }
+.bg-slate-50 { background: var(--bg-primary) !important; }
+.text-gray-900 { color: var(--text-primary) !important; }
+.text-gray-600 { color: var(--text-secondary) !important; }
+.text-slate-900 { color: var(--text-primary) !important; }
+.border-gray-200 { border-color: var(--border) !important; }
+.shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important; }
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }

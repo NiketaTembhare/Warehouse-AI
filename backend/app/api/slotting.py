@@ -1,11 +1,10 @@
+from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List
 from app.agents.slotting import run_slotting
 
 
 router = APIRouter()
-
 
 class SlottingMove(BaseModel):
     """
@@ -13,6 +12,7 @@ class SlottingMove(BaseModel):
     Each field tells the manager exactly what to move and where.
     """
     sku_id:       str    # which product to move
+    sku_name:     Optional[str] = None # product name
     order_count:  int    # how many times it was ordered (velocity)
     abc_class:    str    # A, B, or C classification
     current_node: str    # where it is now (e.g. D10)
@@ -38,6 +38,7 @@ class SlottingResponse(BaseModel):
 
 
 @router.get("/slotting", response_model=SlottingResponse)
+@router.post("/slotting", response_model=SlottingResponse)
 def optimize_slotting():
     """
     GET /api/slotting

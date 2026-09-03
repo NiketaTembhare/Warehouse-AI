@@ -6,6 +6,7 @@ from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 from sqlalchemy import text
 from app.core.database import engine
+from app.core.config import settings
 
 
 def build_warehouse_graph() -> nx.Graph:
@@ -59,6 +60,7 @@ def get_order_bins(order_id: str) -> list:
     query = text("""
         SELECT
             oi.sku_id,
+            s.sku_name,
             oi.quantity,
             i.node_id,
             n.x,
@@ -67,6 +69,7 @@ def get_order_bins(order_id: str) -> list:
         FROM order_items oi
         JOIN inventory i ON oi.sku_id = i.sku_id
         JOIN warehouse_nodes n ON i.node_id = n.node_id
+        JOIN sku_master s ON oi.sku_id = s.sku_id
         WHERE oi.order_id = :order_id
     """)
 
@@ -76,11 +79,12 @@ def get_order_bins(order_id: str) -> list:
         for row in result:
             bins.append({
                 "sku_id":   row[0],
-                "quantity": row[1],
-                "node_id":  row[2],
-                "x":        row[3],
-                "y":        row[4],
-                "zone":     row[5]
+                "sku_name": row[1],
+                "quantity": row[2],
+                "node_id":  row[3],
+                "x":        row[4],
+                "y":        row[5],
+                "zone":     row[6]
             })
 
     return bins
@@ -205,12 +209,39 @@ def solve_tsp(distance_matrix: list) -> list:
     return route_indices
 
 
+def format_node_label(node_id: str) -> str:
+    """
+    Converts raw node IDs to human-readable labels.
+    
+    Examples:
+    RECEIVE → "Receiving Dock"
+    PACK    → "Packing Station"  
+    A03     → "Aisle A · Bin 03"
+    B05     → "Aisle B · Bin 05"
+    D10     → "Aisle D · Bin 10"
+    """
+    if node_id == "RECEIVE":
+        return "Receiving Dock"
+    if node_id == "PACK":
+        return "Packing Station"
+    if len(node_id) >= 2:
+        aisle = node_id[0].upper()
+        bin_num = node_id[1:]
+        return f"Aisle {aisle} · Bin {bin_num}"
+    return node_id
+
+
 def run_pick_path(order_id: str) -> dict:
+    mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
     mlflow.set_experiment('warehouse_agents')
     with mlflow.start_run():
         start_time = time.time()
         mlflow.set_tag('agent', 'pick_path')
+        mlflow.set_tag('agent_name', 'pick_path')
+        mlflow.set_tag('model', 'NetworkX + Google OR-Tools TSP')
+        mlflow.set_tag('status', 'SUCCESS')
         mlflow.log_param('query', order_id)
+        mlflow.log_param('question', f"Pick Path Optimization for Order {order_id}")
 
         """
         Main function — finds the optimal picking route for any order.
@@ -295,27 +326,40 @@ def run_pick_path(order_id: str) -> dict:
             elif node_id == "PACK":
                 action = "End at Packing station — pack and dispatch order"
             elif sku_at_node:
-                action = (f"Pick {sku_at_node['quantity']} unit(s) "
-                          f"of {sku_at_node['sku_id']}")
+                sku_display = (
+                    f"{sku_at_node.get('sku_name', sku_at_node['sku_id'])} "
+                    f"({sku_at_node['sku_id']})"
+                )
+                action = f"Pick {sku_at_node['quantity']} unit(s) of {sku_display}"
             else:
                 action = "Pass through"
 
+            node_x = 0.0
+            node_y = 12.0 if node_id == "RECEIVE" else (0.0 if node_id == "PACK" else 0.0)
+            if sku_at_node:
+                node_x = float(sku_at_node.get("x", 0.0))
+                node_y = float(sku_at_node.get("y", 0.0))
+
             steps.append({
-                "step":    step_num,
-                "node_id": node_id,
-                "action":  action
+                "step":       step_num,
+                "node_id":    node_id,
+                "node_label": format_node_label(node_id),
+                "x":          node_x,
+                "y":          node_y,
+                "action":     action
             })
 
         elapsed = time.time() - start_time
         mlflow.log_metric('response_time', elapsed)
         return {
-            "order_id":            order_id,
-            "total_items":         len(bin_locations),
-            "total_unique_bins":   len(unique_bins),
-            "optimal_route":       optimal_route,
-            "optimized_distance_m": optimized_distance,
-            "baseline_distance_m":  baseline_distance,
-            "distance_saved_pct":  saved_pct,
-            "pick_steps":          steps,
-            "items_in_order":      bin_locations
+            "order_id":              order_id,
+            "total_items":           len(bin_locations),
+            "total_unique_bins":     len(unique_bins),
+            "optimal_route":         optimal_route,
+            "optimal_route_labeled": [format_node_label(n) for n in optimal_route],
+            "optimized_distance_m":  optimized_distance,
+            "baseline_distance_m":   baseline_distance,
+            "distance_saved_pct":    saved_pct,
+            "pick_steps":            steps,
+            "items_in_order":        bin_locations
         }

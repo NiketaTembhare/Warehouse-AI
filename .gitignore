@@ -1,12 +1,13 @@
-# Byte-compiled / optimized / DLL files
+# ─────────────────────────────────────────
+# Python
+# ─────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
+*.pyd
 
-# Environments
+# Virtual environments
 .env
 .venv
 env/
@@ -14,18 +15,64 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
-# Vector database storage
-chroma_store/
-chroma.sqlite3
-backend/chroma_store/
 backend/venv/
 backend/.env
 
-# IDEs
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ─────────────────────────────────────────
+# MLflow (developer / backend only)
+# ─────────────────────────────────────────
+mlflow.db
+backend/mlflow.db
+mlruns/
+
+# ─────────────────────────────────────────
+# Databases & Vector Stores
+# ─────────────────────────────────────────
+*.db
+*.sqlite3
+chroma_store/
+backend/chroma_store/
+chroma.sqlite3
+
+# ─────────────────────────────────────────
+# Node / Frontend
+# ─────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+*.local
+
+# ─────────────────────────────────────────
+# Build outputs
+# ─────────────────────────────────────────
+dist/
+build/
+
+# ─────────────────────────────────────────
+# IDE & OS metadata
+# ─────────────────────────────────────────
 .vscode/
 .idea/
-
-# OS metadata
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+
+# ─────────────────────────────────────────
+# Logs & Temp files
+# ─────────────────────────────────────────
+*.log
+*.tmp
+*.temp

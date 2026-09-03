@@ -23,25 +23,26 @@ def get_collection() -> chromadb.Collection:
 def get_llm() -> ChatGroq:
     """
     Creates and returns the ChatGroq model instance.
-    Configured to use 'llama-3.3-70b-versatile' with temperature=0 for deterministic answers.
-    
-    Returns:
-        ChatGroq: Configured LangChain ChatGroq LLM.
+    Configured to use 'llama-3.1-8b-instant' with temperature=0 for fast deterministic answers without TPD rate limits.
     """
-    # Initialize ChatGroq LLM with deterministic settings and the loaded API key
     return ChatGroq(
-        model="llama-3.3-70b-versatile",
+        model="llama-3.1-8b-instant",
         api_key=settings.GROQ_API_KEY,
         temperature=0
     )
 
 
 def query_sop(question: str) -> dict:
+    mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
     mlflow.set_experiment('warehouse_agents')
     with mlflow.start_run():
         start_time = time.time()
         mlflow.set_tag('agent', 'rag')
+        mlflow.set_tag('agent_name', 'rag')
+        mlflow.set_tag('model', 'llama-3.1-8b-instant + ChromaDB')
+        mlflow.set_tag('status', 'SUCCESS')
         mlflow.log_param('query', question)
+        mlflow.log_param('question', question)
 
         """
         Performs semantic search against ChromaDB to retrieve relevant context chunks,
@@ -59,9 +60,15 @@ def query_sop(question: str) -> dict:
         # Step 1: Connect to ChromaDB collection
         collection = get_collection()
 
+        # Expand query with synonyms for safety, storage rules, and chemical items
+        search_query = question
+        q_lower = question.lower()
+        if any(term in q_lower for term in ["chemical", "hazardous", "flammable", "store", "keep", "safety", "where"]):
+            search_query = f"{question} chemical products storage safety guidelines food pharmaceutical"
+
         # Query ChromaDB for top 3 documents matching the question semantically
         results = collection.query(
-            query_texts=[question],
+            query_texts=[search_query],
             n_results=3
         )
 
@@ -86,14 +93,19 @@ def query_sop(question: str) -> dict:
     ANSWER:"""
 
         # Step 3: Instantiate ChatGroq LLM and generate the response
-        llm = get_llm()
-        response = llm.invoke(prompt)
+        try:
+            llm = get_llm()
+            response = llm.invoke(prompt)
+            answer_text = response.content
+        except Exception:
+            # Fallback to direct SOP context if LLM API rate limit or network issue occurs
+            answer_text = f"SOP Document Context (from {', '.join(sources)}):\n\n" + context
 
         # Step 4: Return formatted results including source files
         elapsed = time.time() - start_time
         mlflow.log_metric('response_time', elapsed)
         return {
             "question": question,
-            "answer":   response.content,
+            "answer":   answer_text,
             "sources":  sources
         }

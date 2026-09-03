@@ -33,27 +33,31 @@ def get_llm():
 def get_velocity_data():
     """
     Queries order_items table to count how many times
-    each SKU has been ordered.
+    each SKU has been ordered, joining sku_master for product names.
     
     This is the VELOCITY — how fast a SKU moves.
     Higher order count = higher velocity = needs to be closer to packing.
     
     Returns:
-        list of dicts: [{"sku_id": "SKU01141", "order_count": 244}, ...]
+        list of dicts: [{"sku_id": "SKU01141", "sku_name": "Widget A", "order_count": 244}, ...]
         sorted from highest to lowest order count
     """
     query = text("""
-        SELECT sku_id, COUNT(*) as order_count
-        FROM order_items
-        GROUP BY sku_id
+        SELECT oi.sku_id, m.sku_name, COUNT(*) as order_count
+        FROM order_items oi
+        LEFT JOIN sku_master m ON oi.sku_id = m.sku_id
+        GROUP BY oi.sku_id, m.sku_name
         ORDER BY order_count DESC
     """)
     
     with engine.connect() as conn:
         result = conn.execute(query)
         # Convert to list of dicts for easy processing
-        rows = [{"sku_id": row[0], "order_count": row[1]} 
-                for row in result]
+        rows = [{
+            "sku_id":      row[0], 
+            "sku_name":    row[1] or row[0], 
+            "order_count": row[2]
+        } for row in result]
     
     return rows
 
@@ -150,6 +154,7 @@ def find_mismatches(velocity_data: list, locations: dict) -> list:
     
     for sku in velocity_data:
         sku_id      = sku["sku_id"]
+        sku_name    = sku.get("sku_name", sku_id)
         target_zone = sku["target_zone"]
         
         # Skip if we don't have location data for this SKU
@@ -167,6 +172,7 @@ def find_mismatches(velocity_data: list, locations: dict) -> list:
         if current_zone != target_zone:
             mismatches.append({
                 "sku_id":       sku_id,
+                "sku_name":     sku_name,
                 "order_count":  sku["order_count"],
                 "abc_class":    sku["abc_class"],
                 "current_node": node_id,
@@ -183,53 +189,74 @@ def find_mismatches(velocity_data: list, locations: dict) -> list:
 
 def generate_summary(mismatches: list, total_skus: int) -> str:
     """
-    Uses Groq LLM to write a human-readable summary of the 
-    slotting recommendations.
-    
-    NOTE: Groq does NOT calculate anything here.
-    We pass it the already-calculated numbers and ask it 
-    to write a clear explanation for the warehouse manager.
-    
-    Args:
-        mismatches: list of mismatched SKUs
-        total_skus: total number of SKUs analyzed
-    
-    Returns:
-        str: Human-readable recommendation summary
+    Generates human-readable summary using product names
+    not SKU IDs. Fetches names from sku_master first.
+    Includes rate-limit fallback handling for Groq models.
     """
-    # Build a text summary of top 5 mismatches to pass to LLM
+    from sqlalchemy import text
+
+    # Fetch product names for top 5 mismatched SKUs
     top5 = mismatches[:5]
+    top5_ids = [m['sku_id'] for m in top5]
+
+    with engine.connect() as conn:
+        result = conn.execute(text("""
+            SELECT sku_id, sku_name 
+            FROM sku_master 
+            WHERE sku_id = ANY(:ids)
+        """), {"ids": top5_ids})
+        name_map = {row[0]: row[1] for row in result}
+
+    # Build summary text with product names
     mismatch_text = "\n".join([
-        f"- {m['sku_id']} (Class {m['abc_class']}, {m['order_count']} orders): "
-        f"currently in {m['current_zone']} zone, should move to {m['target_zone']} zone"
+        f"- {name_map.get(m['sku_id'], m['sku_id'])} "
+        f"(Class {m['abc_class']}, {m['order_count']} orders): "
+        f"currently in {m['current_zone']} zone, "
+        f"should move to {m['target_zone']} zone"
         for m in top5
     ])
-    
-    prompt = f"""You are a warehouse optimization assistant.
-Based on the analysis below, write a clear 3-4 sentence 
-recommendation summary for the warehouse manager.
-Be specific about which SKUs need to move and why.
-Do not add any information not provided below.
 
-ANALYSIS RESULTS:
+    prompt = f"""You are a warehouse optimization assistant.
+Write a clear 2-3 sentence summary for the warehouse manager.
+Use product names not SKU IDs.
+Be direct about what needs to happen.
+
+ANALYSIS:
 - Total SKUs analyzed: {total_skus}
-- Total mismatched SKUs found: {len(mismatches)}
-- Top priority moves needed:
+- Mismatches found: {len(mismatches)}
+- Top moves needed:
 {mismatch_text}
 
-Write the manager summary:"""
-    
-    llm = get_llm()
-    response = llm.invoke(prompt)
-    return response.content
+Write the summary:"""
+
+    # Primary and fallback models to prevent 429 rate limit errors from crashing analysis
+    for model_name in ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]:
+        try:
+            llm = ChatGroq(model=model_name, api_key=settings.GROQ_API_KEY, temperature=0)
+            response = llm.invoke(prompt)
+            return response.content
+        except Exception:
+            continue
+
+    # Structured string fallback if LLM services are temporarily rate-limited
+    top_moves = ", ".join([
+        f"{name_map.get(m['sku_id'], m['sku_id'])} (move to {m['target_zone']})"
+        for m in top5
+    ])
+    return f"Slotting analysis completed. Analyzed {total_skus} SKUs and found {len(mismatches)} mismatches. Priority relocations: {top_moves}."
 
 
 def run_slotting() -> dict:
+    mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
     mlflow.set_experiment('warehouse_agents')
     with mlflow.start_run():
         start_time = time.time()
         mlflow.set_tag('agent', 'slotting')
+        mlflow.set_tag('agent_name', 'slotting')
+        mlflow.set_tag('model', 'Pareto ABC + Groq Summarizer')
+        mlflow.set_tag('status', 'SUCCESS')
         mlflow.log_param('query', 'N/A')
+        mlflow.log_param('question', 'Run Slotting Optimization')
 
         """
         Main function — runs the complete slotting optimization pipeline.

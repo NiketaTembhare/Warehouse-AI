@@ -5,6 +5,14 @@ from app.api import sop
 from app.api import slotting
 from app.api import pick_path
 from app.api import chat
+from app.api import mlflow_telemetry
+
+import mlflow
+from app.core.config import settings
+
+mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
+mlflow.set_experiment("warehouse_agents")
+mlflow.langchain.autolog()
 
 app = FastAPI(
     title="Warehouse AI Assistant",
@@ -14,7 +22,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -24,7 +33,9 @@ app.include_router(sop.router, prefix="/api")
 app.include_router(slotting.router, prefix="/api")
 app.include_router(pick_path.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
+app.include_router(mlflow_telemetry.router, prefix="/api")
 
+@app.get("/api/health")
 @app.get("/health")
 def health():
     return {
