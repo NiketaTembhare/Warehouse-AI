@@ -193,23 +193,27 @@ def generate_summary(mismatches: list, total_skus: int) -> str:
     not SKU IDs. Fetches names from sku_master first.
     Includes rate-limit fallback handling for Groq models.
     """
-    from sqlalchemy import text
-
-    # Fetch product names for top 5 mismatched SKUs
     top5 = mismatches[:5]
-    top5_ids = [m['sku_id'] for m in top5]
+    name_map = {m['sku_id']: m.get('sku_name', m['sku_id']) for m in top5}
 
-    with engine.connect() as conn:
-        result = conn.execute(text("""
-            SELECT sku_id, sku_name 
-            FROM sku_master 
-            WHERE sku_id = ANY(:ids)
-        """), {"ids": top5_ids})
-        name_map = {row[0]: row[1] for row in result}
+    top5_ids = [m['sku_id'] for m in top5 if 'sku_id' in m]
+    if top5_ids:
+        try:
+            placeholders = ", ".join([f"'{s}'" for s in top5_ids])
+            with engine.connect() as conn:
+                result = conn.execute(text(f"""
+                    SELECT sku_id, sku_name 
+                    FROM sku_master 
+                    WHERE sku_id IN ({placeholders})
+                """))
+                for row in result:
+                    name_map[row[0]] = row[1]
+        except Exception as e:
+            print(f"Name lookup note: {e}")
 
     # Build summary text with product names
     mismatch_text = "\n".join([
-        f"- {name_map.get(m['sku_id'], m['sku_id'])} "
+        f"- {name_map.get(m['sku_id'], m.get('sku_name', m['sku_id']))} "
         f"(Class {m['abc_class']}, {m['order_count']} orders): "
         f"currently in {m['current_zone']} zone, "
         f"should move to {m['target_zone']} zone"

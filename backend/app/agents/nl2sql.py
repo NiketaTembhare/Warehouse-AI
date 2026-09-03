@@ -29,7 +29,7 @@ def run_nl2sql(question: str) -> dict:
         mlflow.log_param('query', question)
         mlflow.log_param('question', question)
 
-        system_prompt = """You are an expert PostgreSQL DBA for an enterprise warehouse management system.
+        system_prompt = """You are an expert SQL DBA for an enterprise warehouse management system.
 Database Schema:
 1. sku_master (sku_id TEXT, sku_name TEXT, category TEXT, sub_category TEXT, weight_kg FLOAT, storage_type TEXT, preferred_zone TEXT)
 2. inventory (inventory_id TEXT, sku_id TEXT, node_id TEXT, quantity INT)
@@ -52,7 +52,7 @@ Rules for SQL Generation:
             # Strip code block syntax if present
             sql_clean = re.sub(r'```sql|```', '', sql_response).strip()
             
-            # Execute on PostgreSQL
+            # Execute on SQL Database
             with engine.connect() as conn:
                 result = conn.execute(text(sql_clean))
                 rows = result.fetchall()
@@ -94,6 +94,16 @@ Answer:"""
                         """))
                         items = [f"• {row[0]}: {row[1]} units sold" for row in res]
                         answer = "Here are our top selling products:\n" + "\n".join(items) if items else "Top selling products retrieved."
+                    elif "zone" in q_lower or "location" in q_lower:
+                        res = conn.execute(text("""
+                            SELECT n.zone, COUNT(DISTINCT i.sku_id) as total_products
+                            FROM inventory i
+                            JOIN warehouse_nodes n ON i.node_id = n.node_id
+                            GROUP BY n.zone
+                            ORDER BY total_products DESC
+                        """))
+                        items = [f"• Zone {row[0]}: {row[1]} distinct products" for row in res]
+                        answer = "Here is the product distribution across warehouse zones:\n" + "\n".join(items) if items else "Zone product count retrieved."
                     else:
                         res = conn.execute(text("SELECT COUNT(*) FROM sku_master"))
                         cnt = res.scalar()
