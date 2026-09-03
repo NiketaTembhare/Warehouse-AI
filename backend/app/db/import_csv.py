@@ -19,8 +19,8 @@ def import_csv(filepath, table_name):
     # (your sku_master.csv had some whitespace in preferred_zone)
     df = df.apply(lambda col: col.str.strip() if col.dtype == "object" else col)
 
-    df.to_sql(table_name, engine, if_exists="append", index=False)
-    print(f"✅ Imported {len(df)} rows into '{table_name}'")
+    df.to_sql(table_name, engine, if_exists="replace", index=False)
+    print(f"[OK] Imported {len(df)} rows into '{table_name}'")
 
 
 def run():
