@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import query
@@ -10,9 +11,9 @@ from app.api import mlflow_telemetry
 import mlflow
 from app.core.config import settings
 
+# ─── MLflow Setup (developer observability — not user-facing) ────────────────
 mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
 mlflow.set_experiment("warehouse_agents")
-mlflow.langchain.autolog()
 
 app = FastAPI(
     title="Warehouse AI Assistant",
@@ -20,9 +21,18 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# ─── CORS ─────────────────────────────────────────────────────────────────────
+# In production, set ALLOWED_ORIGINS env var to your Vercel URL
+# e.g. ALLOWED_ORIGINS=https://warehouse-ai.vercel.app
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "*")
+if _raw_origins == "*":
+    allow_origins = ["*"]
+else:
+    allow_origins = [o.strip() for o in _raw_origins.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,4 +51,4 @@ def health():
     return {
         "status": "running",
         "message": "Warehouse AI is online"
-    }
+    }

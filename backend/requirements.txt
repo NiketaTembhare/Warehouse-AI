@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 sqlalchemy
 psycopg2-binary
 pandas
@@ -7,18 +7,10 @@ python-dotenv
 python-jose[cryptography]
 passlib[bcrypt]
 langchain
-
 langchain-community
-chromadb
-
-networkx
-ortools
 langchain-groq
 langgraph
-mlflow
-
-# Step 1: uvicorn app.main:app --reload
-# Step 2: Open localhost:8000/docs
-# Step 3: Run NL2SQL → "Which SKU has highest order count?"
-# Step 4: Run RAG → "How should heavy items be stored?"
-# Step 5: Show terminal — mentor can see Groq thinking in real time
+chromadb
+networkx
+ortools
+mlflow
