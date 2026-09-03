@@ -11,6 +11,12 @@ from app.api import mlflow_telemetry
 import mlflow
 from app.core.config import settings
 
+from app.models import Base
+from app.core.database import engine
+from sqlalchemy import text
+from app.db.import_csv import run as run_import_csv
+from app.db.ingest_sops import ingest_documents
+
 # ─── MLflow Setup (developer observability — not user-facing) ────────────────
 mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
 mlflow.set_experiment("warehouse_agents")
@@ -20,6 +26,35 @@ app = FastAPI(
     description="AI-powered warehouse slotting and picking optimization",
     version="1.0.0"
 )
+
+@app.on_event("startup")
+def startup_db_init():
+    """
+    Auto-initializes tables, populates CSV datasets, and ingests SOP documents
+    if the database or vector store is empty (e.g. on fresh Render/Cloud deployment).
+    """
+    try:
+        Base.metadata.create_all(bind=engine)
+        with engine.connect() as conn:
+            sku_count = conn.execute(text("SELECT COUNT(*) FROM sku_master")).scalar()
+            if not sku_count or sku_count == 0:
+                print("📦 Database is empty! Auto-seeding CSV datasets...")
+                run_import_csv()
+            else:
+                print(f"✅ Database loaded with {sku_count} registered SKUs.")
+    except Exception as e:
+        print(f"⚠️ Startup DB auto-seed note: {e}")
+
+    try:
+        from app.agents.rag import get_collection
+        collection = get_collection()
+        if collection.count() == 0:
+            print("📄 ChromaDB vector store is empty! Auto-ingesting SOP text files...")
+            ingest_documents()
+        else:
+            print(f"✅ ChromaDB loaded with {collection.count()} SOP documents.")
+    except Exception as e:
+        print(f"⚠️ Startup SOP vector store note: {e}")
 
 # ─── CORS ─────────────────────────────────────────────────────────────────────
 # In production, set ALLOWED_ORIGINS env var to your Vercel URL

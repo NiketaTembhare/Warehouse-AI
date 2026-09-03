@@ -25,15 +25,19 @@ def import_csv(filepath, table_name):
 
 def run():
     print("Starting CSV import...\n")
+    
+    # Locate datasets directory relative to project structure
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    datasets_dir = os.path.join(base_dir, "datasets")
 
-    import_csv("datasets/warehouse_nodes.csv", "warehouse_nodes")
-    import_csv("datasets/warehouse_paths.csv", "warehouse_paths")
-    import_csv("datasets/sku_master.csv",      "sku_master")
-    import_csv("datasets/inventory.csv",        "inventory")
-    import_csv("datasets/orders.csv",           "orders")
-    import_csv("datasets/order_items.csv",      "order_items")
+    import_csv(os.path.join(datasets_dir, "warehouse_nodes.csv"), "warehouse_nodes")
+    import_csv(os.path.join(datasets_dir, "warehouse_paths.csv"), "warehouse_paths")
+    import_csv(os.path.join(datasets_dir, "sku_master.csv"),      "sku_master")
+    import_csv(os.path.join(datasets_dir, "inventory.csv"),        "inventory")
+    import_csv(os.path.join(datasets_dir, "orders.csv"),           "orders")
+    import_csv(os.path.join(datasets_dir, "order_items.csv"),      "order_items")
 
-    print("\n All CSVs imported successfully into PostgreSQL.")
+    print("\n All CSVs imported successfully.")
 
 
 if __name__ == "__main__":
