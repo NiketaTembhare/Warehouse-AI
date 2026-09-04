@@ -214,11 +214,11 @@ def format_node_label(node_id: str) -> str:
     Converts raw node IDs to human-readable labels.
     
     Examples:
-    RECEIVE → "Receiving Dock"
-    PACK    → "Packing Station"  
-    A03     → "Aisle A · Bin 03"
-    B05     → "Aisle B · Bin 05"
-    D10     → "Aisle D · Bin 10"
+    RECEIVE -> "Receiving Dock"
+    PACK    -> "Packing Station"  
+    A03     -> "Aisle A - Bin 03"
+    B05     -> "Aisle B - Bin 05"
+    D10     -> "Aisle D - Bin 10"
     """
     if node_id == "RECEIVE":
         return "Receiving Dock"
@@ -227,7 +227,7 @@ def format_node_label(node_id: str) -> str:
     if len(node_id) >= 2:
         aisle = node_id[0].upper()
         bin_num = node_id[1:]
-        return f"Aisle {aisle} · Bin {bin_num}"
+        return f"Aisle {aisle} - Bin {bin_num}"
     return node_id
 
 
@@ -244,7 +244,7 @@ def run_pick_path(order_id: str) -> dict:
         mlflow.log_param('question', f"Pick Path Optimization for Order {order_id}")
 
         """
-        Main function — finds the optimal picking route for any order.
+        Main function - finds the optimal picking route for any order.
     
         Complete flow:
         1. Build warehouse graph (NetworkX)
@@ -280,13 +280,13 @@ def run_pick_path(order_id: str) -> dict:
                 seen_nodes.add(loc["node_id"])
                 unique_bins.append(loc)
 
-        # Final visit order: RECEIVE → all bins → PACK
+        # Final visit order: RECEIVE -> all bins -> PACK
         visit_nodes = ["RECEIVE"] + [b["node_id"] for b in unique_bins] + ["PACK"]
 
         # Step 4: Build distance matrix between all visit nodes
         distance_matrix = build_distance_matrix(graph, visit_nodes)
 
-        # Step 5: Solve TSP — find optimal bin visit sequence
+        # Step 5: Solve TSP - find optimal bin visit sequence
         optimal_indices = solve_tsp(distance_matrix)
 
         # Convert indices back to node names
@@ -298,7 +298,7 @@ def run_pick_path(order_id: str) -> dict:
             optimized_distance += distance_matrix[optimal_indices[i]][optimal_indices[i+1]]
         optimized_distance = round(optimized_distance / 10, 2)
 
-        # Calculate baseline distance (sequential order: 0→1→2→...→n)
+        # Calculate baseline distance (sequential order: 0->1->2->...->n)
         baseline_distance = 0
         for i in range(len(visit_nodes) - 1):
             baseline_distance += distance_matrix[i][i + 1]
@@ -322,9 +322,9 @@ def run_pick_path(order_id: str) -> dict:
             )
 
             if node_id == "RECEIVE":
-                action = "Start at Receiving dock — begin picking"
+                action = "Start at Receiving dock - begin picking"
             elif node_id == "PACK":
-                action = "End at Packing station — pack and dispatch order"
+                action = "End at Packing station - pack and dispatch order"
             elif sku_at_node:
                 sku_display = (
                     f"{sku_at_node.get('sku_name', sku_at_node['sku_id'])} "

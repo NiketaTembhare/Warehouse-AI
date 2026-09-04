@@ -64,22 +64,37 @@ def get_orders():
     from app.core.database import engine
     
     with engine.connect() as conn:
-        result = conn.execute(text("""
-            SELECT 
-                o.order_id,
-                STRING_AGG(DISTINCT s.sku_name, ', ') AS item_names,
-                COUNT(oi.sku_id) AS total_items
-            FROM orders o
-            LEFT JOIN order_items oi ON o.order_id = oi.order_id
-            LEFT JOIN sku_master s ON oi.sku_id = s.sku_id
-            GROUP BY o.order_id
-            ORDER BY o.order_id
-            LIMIT 100
-        """))
+        if engine.dialect.name == "sqlite":
+            query_sql = """
+                SELECT 
+                    o.order_id,
+                    GROUP_CONCAT(DISTINCT s.sku_name) AS item_names,
+                    COUNT(oi.sku_id) AS total_items
+                FROM orders o
+                LEFT JOIN order_items oi ON o.order_id = oi.order_id
+                LEFT JOIN sku_master s ON oi.sku_id = s.sku_id
+                GROUP BY o.order_id
+                ORDER BY o.order_id
+                LIMIT 100
+            """
+        else:
+            query_sql = """
+                SELECT 
+                    o.order_id,
+                    STRING_AGG(DISTINCT s.sku_name, ', ') AS item_names,
+                    COUNT(oi.sku_id) AS total_items
+                FROM orders o
+                LEFT JOIN order_items oi ON o.order_id = oi.order_id
+                LEFT JOIN sku_master s ON oi.sku_id = s.sku_id
+                GROUP BY o.order_id
+                ORDER BY o.order_id
+                LIMIT 100
+            """
+        result = conn.execute(text(query_sql))
         orders = [
             {
                 "order_id": row[0],
-                "items_summary": f"{row[1]} ({row[2]} item{'s' if row[2] != 1 else ''})" if row[1] else "Order Items"
+                "items_summary": f"{row[1].replace(',', ', ')} ({row[2]} item{'s' if row[2] != 1 else ''})" if row[1] else "Order Items"
             }
             for row in result
         ]
