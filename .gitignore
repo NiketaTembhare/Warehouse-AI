@@ -71,8 +71,17 @@ Thumbs.db
 *.swo
 
 # ─────────────────────────────────────────
+# Agent & Tool Artifacts
+# ─────────────────────────────────────────
+.agents/
+brag-output/
+skills-lock.json
+backend/agent_outputs.json
+
+# ─────────────────────────────────────────
 # Logs & Temp files
 # ─────────────────────────────────────────
 *.log
 *.tmp
 *.temp
+

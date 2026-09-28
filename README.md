@@ -30,6 +30,7 @@
 - [API Reference](#-api-reference)
 - [Developer Notes — MLflow Observability](#-developer-notes--mlflow-observability)
 - [Future Roadmap](#-future-roadmap)
+- [Other Featured Projects](#-other-featured-projects)
 
 ---
 
@@ -456,6 +457,19 @@ SKU_MASTER ──── INVENTORY ──── WAREHOUSE_NODES
 
 ---
 
+## 🌐 Other Featured AI Projects
+
+Explore my other AI and engineering repositories:
+
+| Project | Description | Link |
+| :--- | :--- | :---: |
+| ⚔️ **AI Death Arena** | Interactive multi-agent battle simulator featuring dynamic strategy planning, LLM agents, and real-time combat analytics. | [niketatembhare/AI-Death-Arena](https://github.com/NiketaTembhare/AI-Death-Arena) |
+| 👁️ **Video Detection AI** | High-performance computer vision engine for real-time video processing, object detection, and automated vision analytics. | [niketatembhare/VideoDetection](https://github.com/NiketaTembhare/VideoDetection) |
+| 💎 **ApexWealth AI** | Intelligent wealth management & financial portfolio analytics platform leveraging predictive AI models and market data feeds. | [niketatembhare/ApexWealth](https://github.com/NiketaTembhare/ApexWealth) |
+| 🛡️ **SecureShield AI** | Next-generation cybersecurity platform utilizing machine learning for automated threat detection, anomaly scoring, and defense. | [niketatembhare/SecureShield-AI](https://github.com/NiketaTembhare/SecureShield-AI) |
+
+---
+
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).
@@ -466,6 +480,6 @@ This project is open source and available under the [MIT License](LICENSE).
 
 Built with ❤️ by [Niketa Tembhare](https://github.com/NiketaTembhare)
 
-*Turning warehouse chaos into operational intelligence — one AI agent at a time.*
+*Turning operational chaos into intelligent automation — one AI agent at a time.*
 
 </div>
